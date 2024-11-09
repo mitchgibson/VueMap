@@ -3,12 +3,6 @@ use std::path::PathBuf;
 use std::collections::HashMap;
 use serde::Serialize;
 
-#[derive(Debug)]
-pub struct ComponentCount {
-    pub name: String,
-    pub count: usize,
-}
-
 #[derive(Debug, PartialEq, Serialize)]
 pub struct Node {
     pub componentName: String,
@@ -32,20 +26,8 @@ pub fn get_all_file_paths(dir: &str) -> Vec<PathBuf> {
           }
       }
   }
-  
-  println!("File paths: {:?}", file_paths);
 
   file_paths    
-}
-
-// Example usage
-pub fn print_all_file_paths() {
-    let dir = "/Users/mitchdelachevrotiere/dev/knak/packages/builder/src";
-    let file_paths = get_all_file_paths(dir);
-    
-    for path in file_paths {
-        println!("{}", path.display());
-    }
 }
 
 pub fn crawl(dir: &str) -> HashMap<String, Node> {
@@ -57,6 +39,9 @@ pub fn crawl(dir: &str) -> HashMap<String, Node> {
         let content = fs::read_to_string(&file_path).expect("Unable to read file");
         let template_block = extract_template_block(&content);
 
+        if template_block.is_empty() {
+            continue;
+        }
         let components = extract_components(&template_block);
 
         if(components.len() > 0) {
@@ -75,20 +60,7 @@ pub fn crawl(dir: &str) -> HashMap<String, Node> {
         }
     }
     nodes
-}
-
-pub fn print_nodes(nodes: &HashMap<String, Node>) {
-    for (key, value) in nodes.iter() {
-        for location in value.locations.iter() {
-            println!("  - {}", location);
-        }
-    }
-}   
-
-fn component_filter(component: &ComponentCount) -> bool {
-    // filter out components with names that start with /
-    !component.name.starts_with("/") && !is_valid_html_tag(&component.name)
-}
+} 
 
 fn extract_template_block(content: &str) -> String {
     // template block should look like this in the file <template>...</template>
@@ -105,6 +77,17 @@ fn extract_template_block(content: &str) -> String {
     content[start_index..end_index].to_string()
 }
 
+fn tag_filter(tag: &str) -> bool {
+        tag.starts_with('/') 
+        || is_valid_html_tag(tag) 
+        || tag.starts_with('!')
+        || tag.starts_with('?') 
+        || tag.starts_with('@') 
+        || tag.starts_with('#') 
+        || tag.starts_with("{{")
+        || tag.is_empty()
+}
+
 fn extract_components(content: &str) -> Vec<String> {
     let mut components = Vec::new();
     let mut start_index = 0;
@@ -115,8 +98,7 @@ fn extract_components(content: &str) -> Vec<String> {
             let end = start + 1 + end;
             let tag = content[start + 1..end].trim().to_string();
             // Ignore end tags and HTML void elements
-            if !tag.starts_with('/') && !is_valid_html_tag(&tag) {
-                // Handle self-closing tags and tags with attributes
+            if !tag_filter(&tag) {
                 let component_name = tag.split_whitespace().next().unwrap_or(&tag).to_string();
                 components.push(component_name);
             }

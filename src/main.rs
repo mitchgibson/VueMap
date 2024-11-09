@@ -1,7 +1,8 @@
 mod crawler;
 
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
-use serde::{Deserialize, Serialize};
+use actix_cors::Cors;
+use actix_web::{get, http, post, web, App, HttpResponse, HttpServer, Responder};
+use serde::{Deserialize};
 use crawler::crawler::{crawl};
 use serde_json::json;
 
@@ -16,6 +17,32 @@ async fn echo(req_body: String) -> impl Responder {
 }
 
 #[derive(Deserialize)]
+struct NodesQuery {
+    dir: Option<String>,
+    filter: Option<String>,
+}
+
+#[get("/nodes")]
+async fn nodes(query: web::Query<NodesQuery>) -> impl Responder {
+    let dir = query.dir.clone();
+    let filter = query.filter.clone();
+    
+    let mut crawl_results = crawl(dir.unwrap().as_str());
+
+    if let Some(f) = filter {
+        crawl_results.retain(|key, _| key.contains(&f));
+    }
+
+    let response = json!({
+      "message": "Crawl completed successfully",
+      "count": crawl_results.len(),
+      "nodes": crawl_results,
+    });
+
+    HttpResponse::Ok().json(response)
+}
+
+#[derive(Deserialize)]
 struct NodeQuery {
     dir: Option<String>,
     // Add other query parameters as needed
@@ -25,15 +52,13 @@ struct NodeQuery {
 async fn node(path: web::Path<(String)>, query: web::Query<NodeQuery>,) -> impl Responder {
   let (component) = path.into_inner();
   let dir = query.dir.clone();
-  let nodes = crawl(dir.unwrap().as_str());
+  let crawl_results = crawl(dir.unwrap().as_str());
 
   let mut count =  0;
-  let target = nodes.get(&component);
+  let target = crawl_results.get(&component);
     match target {
         Some(target) => {
-            println!("Component: {}", target.componentName);
             for location in target.locations.iter() {
-                println!("{}:  - {}", target.componentName, location);
                 count += 1;
             }
         },
@@ -43,26 +68,30 @@ async fn node(path: web::Path<(String)>, query: web::Query<NodeQuery>,) -> impl 
     }
     
   HttpResponse::Ok().json(json!({
-      "nodes": target,
-      "count": count,
-      "message": "Crawl completed successfully"
+    "count": count,
+    "message": "Crawl completed successfully",
+    "node": target,
   }))
-}
-
-async fn manual_hello() -> impl Responder {
-    HttpResponse::Ok().body("Hey there!")
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| {
-        App::new()
-            .service(hello)
-            .service(echo)
-            .service(node)
-            .route("/hey", web::get().to(manual_hello))
-    })
-    .bind(("127.0.0.1", 8080))?
-    .run()
-    .await
+  HttpServer::new(|| {
+    let cors = Cors::default()
+        .allowed_origin("http://localhost:5173")
+        .allow_any_method() // This line allows all HTTP methods
+        .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
+        .allowed_header(http::header::CONTENT_TYPE)
+        .max_age(3600);
+
+    App::new()
+        .wrap(cors)
+        .service(hello)
+        .service(echo)
+        .service(nodes)
+        .service(node)
+})
+.bind(("127.0.0.1", 8080))?
+.run()
+.await
 }
