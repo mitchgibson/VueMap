@@ -1,6 +1,7 @@
 mod crawler;
 
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use serde::{Deserialize, Serialize};
 use crawler::crawler::{crawl};
 use serde_json::json;
 
@@ -14,10 +15,17 @@ async fn echo(req_body: String) -> impl Responder {
     HttpResponse::Ok().body(req_body)
 }
 
+#[derive(Deserialize)]
+struct NodeQuery {
+    dir: Option<String>,
+    // Add other query parameters as needed
+}
+
 #[get("/node/{component}")]
-async fn node(path: web::Path<(String)>) -> impl Responder {
+async fn node(path: web::Path<(String)>, query: web::Query<NodeQuery>,) -> impl Responder {
   let (component) = path.into_inner();
-  let nodes = crawl("/Users/mitchdelachevrotiere/dev/knak/packages/builder/src");
+  let dir = query.dir.clone();
+  let nodes = crawl(dir.unwrap().as_str());
 
   let mut count =  0;
   let target = nodes.get(&component);
