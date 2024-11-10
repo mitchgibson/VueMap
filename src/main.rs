@@ -29,21 +29,27 @@ async fn echo(req_body: String) -> impl Responder {
 struct NodesQuery {
     dir: Option<String>,
     filter: Option<String>,
+    exact: Option<bool>,
 }
 
 #[get("/nodes")]
 async fn nodes(query: web::Query<NodesQuery>) -> impl Responder {
     let dir = query.dir.clone();
     let filter = query.filter.clone();
+    let exact = query.exact.clone();
     
     let mut crawl_results = crawl(dir.unwrap().as_str());
 
     if let Some(f) = filter.filter(|s| !s.is_empty()) {
         let pascal_case_filter = to_pascal_case(&f);
         let kebab_case_filter = to_kebab_case(&f);
-        // crawl_results.retain(|key, _| key.contains(&pascal_case_filter) || key.contains(&kebab_case_filter));
-        // where key == pascal_case_filter || key == kebab_case_filter
-        crawl_results.retain(|key, _| key == &pascal_case_filter || key == &kebab_case_filter);
+        if exact.unwrap() {
+            crawl_results.retain(|key, _| key == &pascal_case_filter || key == &kebab_case_filter);
+        }
+        else {
+            crawl_results.retain(|key, _| key.contains(&pascal_case_filter) || key.contains(&kebab_case_filter));
+        }
+        
     }
 
     let response = json!({

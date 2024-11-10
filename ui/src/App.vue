@@ -8,8 +8,9 @@
       </FloatLabel>
       <FloatLabel variant="on">
         <InputText id="component_search" v-model="componentName" @input="onSearch" />
-        <label for="component_search">Search...</label>
+        <label for="component_search">Component...</label>
       </FloatLabel>
+      <Button icon="pi pi-bullseye" :severity="searchSeverity" title="Exact match" @click="onExactMatchClick" class="p-button-text p-button-sm" />
       <Button icon="pi pi-times-circle" @click="onClearClick" :disabled="!componentName" class="p-button-text p-button-sm" />
     </div>
     <div class="w-full h-full overflow-y-auto px-4">
@@ -46,10 +47,11 @@ import { TreeNode } from 'primevue/treenode';
 import Toast from 'primevue/toast';
 import { useToast } from 'primevue/usetoast';
 
-
-import { onBeforeMount, ref } from 'vue';
+import { computed, onBeforeMount, ref } from 'vue';
 
 const componentName = ref<string>('');
+const exactMatch = ref<boolean>(false);
+const searchSeverity = computed(() => exactMatch.value ? 'success' : 'secondary');
 const directory = ref<string>('/Users/mitchdelachevrotiere/dev/knak/packages/builder/src');
 const searchResults = ref<any>({})
 
@@ -79,12 +81,17 @@ async function copyToClipboard(text: string) {
   }
 }
 
+function onExactMatchClick() {
+  exactMatch.value = !exactMatch.value;
+  onSearch();
+}
+
 async function onSearch() {
   if(!directory.value) {
     alert("Must set valid directory");
     return;
   }
-  const results = await fetch(`http://127.0.0.1:8080/nodes?dir=${directory.value}&filter=${componentName.value}`);
+  const results = await fetch(`http://127.0.0.1:8080/nodes?dir=${directory.value}&filter=${componentName.value}&exact=${exactMatch.value}`);
   const data = await results.json();
   searchResults.value = data;
 
