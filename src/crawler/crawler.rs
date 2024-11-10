@@ -6,7 +6,8 @@ use serde::Serialize;
 #[derive(Debug, PartialEq, Serialize)]
 pub struct Location {
     path: String,
-    filename: String
+    filename: String,
+    package: String,
 }
 
 #[derive(Debug, PartialEq, Serialize)]
@@ -37,7 +38,11 @@ pub fn get_all_file_paths(dir: &str) -> Vec<PathBuf> {
 }
 
 pub fn crawl(dir: &str) -> HashMap<String, Node> {
-    let file_paths = get_all_file_paths(dir);
+    let dirs = dir.split(',');
+    let mut file_paths: Vec<PathBuf> = Vec::new();
+    for _dir in dirs {
+        file_paths.extend(get_all_file_paths(_dir));
+    }
 
     let mut nodes: HashMap<String, Node> = HashMap::new();
 
@@ -58,14 +63,16 @@ pub fn crawl(dir: &str) -> HashMap<String, Node> {
                         component_name: component.clone(),
                         locations: vec![Location {
                             path: file_path_str.clone(),
-                            filename: extract_filename(&file_path_str)
+                            filename: extract_filename(&file_path_str),
+                            package: extract_package(&file_path_str),
                         }]
                     });
                 } else {
                     let node = nodes.get_mut(component).unwrap();
                     node.locations.push(Location {
                         path: file_path_str.clone(),
-                        filename: extract_filename(&file_path_str)
+                        filename: extract_filename(&file_path_str),
+                        package: extract_package(&file_path_str),
                     });
                 }
             }
@@ -73,6 +80,20 @@ pub fn crawl(dir: &str) -> HashMap<String, Node> {
     }
     nodes
 } 
+
+fn extract_package(path: &str) -> String {
+    let package = if path.contains("packages/enterprise") {
+        "enterprise"
+    } else if path.contains("packages/builder") {
+        "builder"
+    } else if path.contains("packages/kui") {
+        "kui"
+    } else {
+        "unknown"
+    };
+
+    package.to_string()
+}
 
 fn extract_filename(path: &str) -> String {
     let path_str = path.to_string();
