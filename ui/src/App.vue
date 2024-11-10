@@ -91,11 +91,11 @@ async function onSearch() {
   treeNodes.value = toTreeNodes(data.nodes);
 }
 
-function toTreeNodes(data: {[key: string]: {componentName:string, locations: {path:string; filename:string}[]}}): TreeNode[] {
+function toTreeNodes(data: {[key: string]: {component_name:string, locations: {path:string; filename:string}[]}}): TreeNode[] {
   return Object.keys(data).map(key => {
     return {
       key: key,
-      label: data[key].componentName,
+      label: data[key].component_name,
       children: data[key].locations.map(location => {
         return {
           key: location.path,

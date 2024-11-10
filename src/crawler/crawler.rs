@@ -11,7 +11,7 @@ pub struct Location {
 
 #[derive(Debug, PartialEq, Serialize)]
 pub struct Node {
-    pub componentName: String,
+    pub component_name: String,
     pub locations: Vec<Location>,
 }
 
@@ -50,12 +50,12 @@ pub fn crawl(dir: &str) -> HashMap<String, Node> {
         }
         let components = extract_components(&template_block);
 
-        if(components.len() > 0) {
+        if components.len() > 0 {
             let file_path_str = file_path.display().to_string();
             for component in components.iter() {
                 if !nodes.contains_key(component) {
                     nodes.insert(component.clone(), Node {
-                        componentName: component.clone(),
+                        component_name: component.clone(),
                         locations: vec![Location {
                             path: file_path_str.clone(),
                             filename: extract_filename(&file_path_str)
@@ -82,29 +82,27 @@ fn extract_filename(path: &str) -> String {
 }
 
 fn extract_template_block(content: &str) -> String {
-    // template block should look like this in the file <template>...</template>
     let start_tag = "<template";
     let end_tag = "</template>";
 
-    // if no template block is found, return an empty string
-    if !content.contains(start_tag) || !content.contains(end_tag) {
-        return String::new();
+    if let (Some(start_index), Some(end_index)) = (content.find(start_tag), content.rfind(end_tag)) {
+        if start_index < end_index {
+            return content[start_index..=end_index + end_tag.len() - 1].to_string();
+        }
     }
-    let start_index = content.find(start_tag).expect("Template block not found") + start_tag.len();
-    let end_index = content.find(end_tag).expect("Template block not found");
 
-    content[start_index..end_index].to_string()
+    String::new()
 }
 
 fn tag_filter(tag: &str) -> bool {
-        tag.starts_with('/') 
-        || is_valid_html_tag(tag) 
-        || tag.starts_with('!')
-        || tag.starts_with('?') 
-        || tag.starts_with('@') 
-        || tag.starts_with('#') 
-        || tag.starts_with("{{")
-        || tag.is_empty()
+    tag.starts_with('/') 
+    || is_valid_html_tag(tag) 
+    || tag.starts_with('!')
+    || tag.starts_with('?') 
+    || tag.starts_with('@') 
+    || tag.starts_with('#') 
+    || tag.starts_with("{{")
+    || tag.is_empty()
 }
 
 fn extract_components(content: &str) -> Vec<String> {
