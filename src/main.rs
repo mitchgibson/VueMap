@@ -5,6 +5,15 @@ use actix_web::{get, http, post, web, App, HttpResponse, HttpServer, Responder};
 use serde::{Deserialize};
 use crawler::crawler::{crawl};
 use serde_json::json;
+use convert_case::{Case, Casing};
+
+fn to_pascal_case(s: &str) -> String {
+    s.to_case(Case::Pascal)
+}
+
+fn to_kebab_case(s: &str) -> String {
+    s.to_case(Case::Kebab)
+}
 
 #[get("/")]
 async fn hello() -> impl Responder {
@@ -29,8 +38,12 @@ async fn nodes(query: web::Query<NodesQuery>) -> impl Responder {
     
     let mut crawl_results = crawl(dir.unwrap().as_str());
 
-    if let Some(f) = filter {
-        crawl_results.retain(|key, _| key.contains(&f));
+    if let Some(f) = filter.filter(|s| !s.is_empty()) {
+        let pascal_case_filter = to_pascal_case(&f);
+        let kebab_case_filter = to_kebab_case(&f);
+        // crawl_results.retain(|key, _| key.contains(&pascal_case_filter) || key.contains(&kebab_case_filter));
+        // where key == pascal_case_filter || key == kebab_case_filter
+        crawl_results.retain(|key, _| key == &pascal_case_filter || key == &kebab_case_filter);
     }
 
     let response = json!({
@@ -58,9 +71,7 @@ async fn node(path: web::Path<(String)>, query: web::Query<NodeQuery>,) -> impl 
   let target = crawl_results.get(&component);
     match target {
         Some(target) => {
-            for location in target.locations.iter() {
-                count += 1;
-            }
+            count += target.locations.len();
         },
         None => {
             println!("Component not found");

@@ -4,9 +4,15 @@ use std::collections::HashMap;
 use serde::Serialize;
 
 #[derive(Debug, PartialEq, Serialize)]
+pub struct Location {
+    path: String,
+    filename: String
+}
+
+#[derive(Debug, PartialEq, Serialize)]
 pub struct Node {
     pub componentName: String,
-    pub locations: Vec<String>,
+    pub locations: Vec<Location>,
 }
 
 pub fn get_all_file_paths(dir: &str) -> Vec<PathBuf> {
@@ -50,17 +56,30 @@ pub fn crawl(dir: &str) -> HashMap<String, Node> {
                 if !nodes.contains_key(component) {
                     nodes.insert(component.clone(), Node {
                         componentName: component.clone(),
-                        locations: vec![file_path_str.clone()]
+                        locations: vec![Location {
+                            path: file_path_str.clone(),
+                            filename: extract_filename(&file_path_str)
+                        }]
                     });
                 } else {
                     let node = nodes.get_mut(component).unwrap();
-                    node.locations.push(file_path_str.clone());
+                    node.locations.push(Location {
+                        path: file_path_str.clone(),
+                        filename: extract_filename(&file_path_str)
+                    });
                 }
             }
         }
     }
     nodes
 } 
+
+fn extract_filename(path: &str) -> String {
+    let path_str = path.to_string();
+    let path_str_split: Vec<&str> = path_str.split('/').collect();
+    let filename = path_str_split.last().unwrap();
+    filename.to_string()
+}
 
 fn extract_template_block(content: &str) -> String {
     // template block should look like this in the file <template>...</template>
