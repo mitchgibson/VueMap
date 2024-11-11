@@ -22,13 +22,13 @@
       <TreeTable :value="treeNodes" tableStyle="min-width: 50rem">
           <Column field="label" header="Components" expander>
             <template #body="slotProps">
-              <div v-if="slotProps.node.data" class="flex flex-row w-full px-4 py-2 items-center justify-between">
+              <div v-if="slotProps.node.data" class="flex flex-row w-full px-4 py-2 items-start justify-between">
                 <div class="flex flex-col">
                   <div class="text-base text-surface-300">{{ slotProps.node.data.filename }}</div>
                   <div class="text-sm text-surface-400 capitalize">{{ slotProps.node.data.package }}</div>
                   <div class="text-sm text-surface-400 mt-2">{{ slotProps.node.data.path }}</div>
                 </div>
-                <div class="flex flex-row items-center justify-end gap-x-2">
+                <div class="flex flex-row items-start justify-end gap-x-2">
                   <Button icon="pi pi-copy" @click="copyToClipboard(slotProps.node.data.filename)" class="p-button-text p-button-sm" />
                   <Button icon="pi pi-search" @click="onLocationClick(slotProps.node.data)" class="p-button-text p-button-sm" />
                 </div>
@@ -67,7 +67,7 @@ type Directory = {
 }
 
 const componentName = ref<string>('');
-const exactMatch = ref<boolean>(false);
+const exactMatch = ref<boolean>(true);
   const searchResults = ref<any>({})
 const searchSeverity = computed(() => exactMatch.value ? 'success' : 'secondary');
 const directories:Directory[] = [
