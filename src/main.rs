@@ -1,7 +1,7 @@
 mod crawler;
 
 use actix_cors::Cors;
-use actix_web::{get, http, post, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{get, http, web, App, HttpResponse, HttpServer, Responder};
 use serde::{Deserialize};
 use crawler::crawler::{crawl};
 use serde_json::json;
@@ -63,8 +63,8 @@ struct NodeQuery {
 }
 
 #[get("/node/{component}")]
-async fn node(path: web::Path<(String)>, query: web::Query<NodeQuery>,) -> impl Responder {
-  let (component) = path.into_inner();
+async fn node(path: web::Path<String>, query: web::Query<NodeQuery>,) -> impl Responder {
+  let component = path.into_inner();
   let dir = query.dir.clone();
   let crawl_results = crawl(dir.unwrap().as_str());
 
