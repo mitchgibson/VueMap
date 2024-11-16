@@ -1,19 +1,14 @@
 mod crawler;
+mod casing;
+mod grapher;
 
 use actix_cors::Cors;
 use actix_web::{get, http, web, App, HttpResponse, HttpServer, Responder};
-use serde::{Deserialize};
-use crawler::crawler::{crawl};
+use serde::Deserialize;
+use crawler::crawler::{crawl, Node};
 use serde_json::json;
-use convert_case::{Case, Casing};
-
-fn to_pascal_case(s: &str) -> String {
-    s.to_case(Case::Pascal)
-}
-
-fn to_kebab_case(s: &str) -> String {
-    s.to_case(Case::Kebab)
-}
+use casing::casing::{to_kebab_case, to_pascal_case};
+use grapher::grapher::build_graph;
 
 #[get("/")]
 async fn hello() -> impl Responder {
@@ -29,31 +24,46 @@ struct NodesQuery {
 
 #[get("/nodes")]
 async fn nodes(query: web::Query<NodesQuery>) -> impl Responder {
-    let dir = query.dir.clone();
-    let filter = query.filter.clone();
-    let exact = query.exact.clone();
-    
-    let mut crawl_results = crawl(dir.unwrap().as_str());
+  let dir = query.dir.clone();
+  let filter = query.filter.clone();
+  let exact = query.exact;
+  
+  let crawl_results = crawl(dir.unwrap().as_str());
 
-    if let Some(f) = filter.filter(|s| !s.is_empty()) {
-        let pascal_case_filter = to_pascal_case(&f);
-        let kebab_case_filter = to_kebab_case(&f);
-        if exact.unwrap() {
-            crawl_results.retain(|key, _| key == &pascal_case_filter || key == &kebab_case_filter);
-        }
-        else {
-            crawl_results.retain(|key, _| key.contains(&pascal_case_filter) || key.contains(&kebab_case_filter));
-        }
-        
-    }
+  let mut filtered_crawl = crawl_results.clone();
 
-    let response = json!({
+  if let Some(f) = filter.as_ref().filter(|s| !s.is_empty()) {
+      let pascal_case_filter = to_pascal_case(f);
+      let kebab_case_filter = to_kebab_case(f);
+      if exact.unwrap_or(false) {
+          filtered_crawl.retain(|key, _| key == &pascal_case_filter || key == &kebab_case_filter);
+      } else {
+          filtered_crawl.retain(|key, _| key.contains(&pascal_case_filter) || key.contains(&kebab_case_filter));
+      }
+  }
+
+  let graph = build_graph(crawl_results.clone(), |n| {
+      if let Some(f) = filter.as_ref() {
+          let pascal_case_filter = to_pascal_case(f);
+          let kebab_case_filter = to_kebab_case(f);
+          if exact.unwrap_or(false) {
+              n.component_name == pascal_case_filter || n.component_name == kebab_case_filter
+          } else {
+              n.component_name.contains(&pascal_case_filter) || n.component_name.contains(&kebab_case_filter)
+          }
+      } else {
+          true // If no filter is provided, include all nodes
+      }
+  });
+
+  let response = json!({
       "message": "Crawl completed successfully",
-      "count": crawl_results.len(),
-      "nodes": crawl_results,
-    });
+      "count": filtered_crawl.len(),
+      "nodes": filtered_crawl,
+      "graph": graph,
+  });
 
-    HttpResponse::Ok().json(response)
+  HttpResponse::Ok().json(response)
 }
 
 #[derive(Deserialize)]
@@ -88,6 +98,8 @@ async fn node(path: web::Path<String>, query: web::Query<NodeQuery>,) -> impl Re
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+
+    // TODO: Add feature where it will show the component tree from the perspective of the targeted component. Start with showing up the tree, but can also do down the tree later
   HttpServer::new(|| {
     let cors = Cors::default()
         .allowed_origin("http://localhost:5173")
@@ -102,7 +114,7 @@ async fn main() -> std::io::Result<()> {
         .service(nodes)
         .service(node)
 })
-.bind(("127.0.0.1", 8080))?
+.bind(("127.0.0.1", 3000))?
 .run()
 .await
 }

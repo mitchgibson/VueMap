@@ -2,15 +2,16 @@ use std::fs;
 use std::path::PathBuf;
 use std::collections::HashMap;
 use serde::Serialize;
+use crate::casing::casing::to_kebab_case;
 
-#[derive(Debug, PartialEq, Serialize)]
+#[derive(Debug, PartialEq, Serialize, Clone)]
 pub struct Location {
-    path: String,
-    filename: String,
-    package: String,
+    pub path: String,
+    pub filename: String,
+    pub package: String,
 }
 
-#[derive(Debug, PartialEq, Serialize)]
+#[derive(Debug, PartialEq, Serialize, Clone)]
 pub struct Node {
     pub component_name: String,
     pub locations: Vec<Location>,
@@ -138,7 +139,7 @@ fn extract_components(content: &str) -> Vec<String> {
             // Ignore end tags and HTML void elements
             if !tag_filter(&tag) {
                 let component_name = tag.split_whitespace().next().unwrap_or(&tag).to_string();
-                components.push(component_name);
+                components.push(to_kebab_case(component_name.as_str()));
             }
 
             start_index = end;

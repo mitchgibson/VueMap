@@ -1,10 +1,8 @@
 import { defineStore } from 'pinia';
-import { TreeNode } from 'primevue/treenode';
 import { computed, ref, watch } from 'vue';
-import { Location } from '../types/Location';
 import { Directory } from '../types/Directory';
 
-export const useComponentLocationStore = defineStore('ComponentLocation', () => {
+export const useComponentMapStore = defineStore('ComponentMap', () => {
   const directoryOptions:Directory[] = [
     { name: 'Builder', value: '/Users/mitchdelachevrotiere/dev/knak/packages/builder/src' },
     { name: 'Kui', value: '/Users/mitchdelachevrotiere/dev/knak/packages/kui/src' },
@@ -16,8 +14,8 @@ export const useComponentLocationStore = defineStore('ComponentLocation', () => 
   const loading = ref<boolean>(false);
   const error = ref<boolean>(false);
   const exactMatch = ref<boolean>(true);
-  const components = ref<TreeNode[]>([]);
-  const count = computed(() => components.value.length);
+  const graph = ref<{nodes: any[], edges: any[]}>({ nodes: [], edges: [] });
+  const count = computed(() => graph.value.nodes.length);
 
   async function search() {
     if(!directories.value) {
@@ -28,7 +26,7 @@ export const useComponentLocationStore = defineStore('ComponentLocation', () => 
     try {
       const results = await fetch(`http://127.0.0.1:3000/nodes?dir=${directories.value?.join(',')}&filter=${query.value}&exact=${exactMatch.value}`);
       const data = await results.json();
-      components.value = toTreeNodes(data.nodes); 
+      graph.value = data.graph; 
     } catch(err) {
       error.value = true;
     }
@@ -45,24 +43,8 @@ export const useComponentLocationStore = defineStore('ComponentLocation', () => 
     search();
   });
 
-  function toTreeNodes(data: {[key: string]: {component_name:string, locations: Location[]}}): TreeNode[] {
-    return Object.keys(data).map(key => {
-      return {
-        key: key,
-        label: data[key].component_name,
-        children: data[key].locations.map(location => {
-          return {
-            key: location.path,
-            label: location.filename,
-            data: location
-          }
-        })
-      }
-    });
-  }
-
   return {
-    components,
+    graph,
     search,
     exactMatch,
     query,

@@ -18,8 +18,9 @@
         <div class="text-sm text-surface-400">Found {{ componentLocations.count }} components</div>
       </div>
     </div>
-    <div class="w-full overflow-y-auto px-4">
-      <ComponentLocationTable :data="componentLocations.components" @location-search="onLocationSearch" />
+    <div class="w-full overflow-y-auto px-4 flex flex-row grow">
+      <!-- <ComponentLocationTable v-if="componentLocations.components.length > 1" :data="componentLocations.components" @location-search="onLocationSearch" /> -->
+      <ComponentConnections v-if="componentLocations.graph.nodes.length > 0" :data="componentLocations.graph" />
     </div>
   </div>
 </template>
@@ -33,9 +34,11 @@ import Toast from 'primevue/toast';
 import { computed } from 'vue';
 import { Location } from './types/Location';;
 import ComponentLocationTable from './components/ComponentLocationTable.vue';
-import { useComponentLocationStore } from './stores/ComponentLocation';
+import ComponentConnections from './components/ComponentConnections.vue';
+// import { useComponentLocationStore } from './stores/ComponentLocation';
+import { useComponentMapStore } from './stores/ComponentMap';
 
-const componentLocations = useComponentLocationStore();
+const componentLocations = useComponentMapStore();
 
 const searchSeverity = computed(() => componentLocations.exactMatch ? 'success' : 'secondary');
 
