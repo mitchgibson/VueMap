@@ -18,9 +18,9 @@
         <div class="text-sm text-surface-400">Found {{ componentLocations.count }} components</div>
       </div>
     </div>
-    <div class="w-full overflow-y-auto px-4 flex flex-row grow">
-      <!-- <ComponentLocationTable v-if="componentLocations.components.length > 1" :data="componentLocations.components" @location-search="onLocationSearch" /> -->
-      <ComponentConnections v-if="componentLocations.graph.nodes.length > 0" :data="componentLocations.graph" />
+    <div class="overflow-y-auto px-4 flex flex-row grow w-full">
+      <ComponentLocationTable v-if="!componentLocations.focusComponent" class="grow" :data="componentLocations.components" @location-search="onLocationFocus" />
+      <ComponentConnections v-if="componentLocations.focusComponent" />
     </div>
   </div>
 </template>
@@ -35,15 +35,19 @@ import { computed } from 'vue';
 import { Location } from './types/Location';;
 import ComponentLocationTable from './components/ComponentLocationTable.vue';
 import ComponentConnections from './components/ComponentConnections.vue';
-// import { useComponentLocationStore } from './stores/ComponentLocation';
-import { useComponentMapStore } from './stores/ComponentMap';
+import { useComponentLocationStore } from './stores/ComponentLocation';
+// import { useComponentMapStore } from './stores/ComponentMap';
 
-const componentLocations = useComponentMapStore();
+const componentLocations = useComponentLocationStore();
 
 const searchSeverity = computed(() => componentLocations.exactMatch ? 'success' : 'secondary');
 
 function onLocationSearch(location: Location) {
-  componentLocations.query = location.filename.split('.')[0];
+  componentLocations.query = location.component;
+}
+
+function onLocationFocus(location: Location) {
+  componentLocations.focusComponent = location.component;
 }
 
 function onClearClick() {

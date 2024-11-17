@@ -8,12 +8,8 @@ console.log('special-nodes', props);
 
 <template>
   <div class="vue-flow__node-default">
+    <Handle type="source" :position="Position.Top" />
     <div>{{ data.label }}</div>
-
-    <div>
-      {x} {y}
-    </div>
-
     <Handle type="source" :position="Position.Bottom" />
   </div>
 </template>

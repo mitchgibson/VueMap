@@ -1,14 +1,12 @@
 mod crawler;
 mod casing;
-mod grapher;
 
 use actix_cors::Cors;
 use actix_web::{get, http, web, App, HttpResponse, HttpServer, Responder};
 use serde::Deserialize;
-use crawler::crawler::{crawl, Node};
+use crawler::crawler::crawl;
 use serde_json::json;
 use casing::casing::{to_kebab_case, to_pascal_case};
-use grapher::grapher::build_graph;
 
 #[get("/")]
 async fn hello() -> impl Responder {
@@ -42,25 +40,10 @@ async fn nodes(query: web::Query<NodesQuery>) -> impl Responder {
       }
   }
 
-  let graph = build_graph(crawl_results.clone(), |n| {
-      if let Some(f) = filter.as_ref() {
-          let pascal_case_filter = to_pascal_case(f);
-          let kebab_case_filter = to_kebab_case(f);
-          if exact.unwrap_or(false) {
-              n.component_name == pascal_case_filter || n.component_name == kebab_case_filter
-          } else {
-              n.component_name.contains(&pascal_case_filter) || n.component_name.contains(&kebab_case_filter)
-          }
-      } else {
-          true // If no filter is provided, include all nodes
-      }
-  });
-
   let response = json!({
       "message": "Crawl completed successfully",
       "count": filtered_crawl.len(),
       "nodes": filtered_crawl,
-      "graph": graph,
   });
 
   HttpResponse::Ok().json(response)

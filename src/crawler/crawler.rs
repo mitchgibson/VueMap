@@ -9,12 +9,14 @@ pub struct Location {
     pub path: String,
     pub filename: String,
     pub package: String,
+    pub component: String,
 }
 
 #[derive(Debug, PartialEq, Serialize, Clone)]
 pub struct Node {
     pub component_name: String,
     pub locations: Vec<Location>,
+    pub children: Vec<String>,
 }
 
 pub fn get_all_file_paths(dir: &str) -> Vec<PathBuf> {
@@ -58,15 +60,18 @@ pub fn crawl(dir: &str) -> HashMap<String, Node> {
 
         if components.len() > 0 {
             let file_path_str = file_path.display().to_string();
+            let filename = &extract_filename(&file_path_str);
             for component in components.iter() {
                 if !nodes.contains_key(component) {
                     nodes.insert(component.clone(), Node {
                         component_name: component.clone(),
                         locations: vec![Location {
                             path: file_path_str.clone(),
-                            filename: extract_filename(&file_path_str),
+                            filename: filename.to_string(),
                             package: extract_package(&file_path_str),
-                        }]
+                            component: filename_to_kebab(filename),
+                        }],
+                        children: Vec::new(),
                     });
                 } else {
                     let node = nodes.get_mut(component).unwrap();
@@ -74,11 +79,27 @@ pub fn crawl(dir: &str) -> HashMap<String, Node> {
                         path: file_path_str.clone(),
                         filename: extract_filename(&file_path_str),
                         package: extract_package(&file_path_str),
+                        component: filename_to_kebab(filename),
                     });
                 }
             }
         }
     }
+
+    let keys: Vec<String> = nodes.keys().cloned().collect();
+    for key_1 in keys.iter() {
+        for key_2 in keys.iter() {
+            if key_1 == key_2 {
+                continue;
+            }
+            let node = nodes.get_mut(key_2).unwrap();
+            if node.locations.iter().any(|location| location.component == *key_1) {
+                let node_1 = nodes.get_mut(key_1).unwrap();
+                node_1.children.push(key_2.clone());
+            }
+        }
+    }
+
     nodes
 } 
 
@@ -94,6 +115,11 @@ fn extract_package(path: &str) -> String {
     };
 
     package.to_string()
+}
+
+fn filename_to_kebab(filename: &str) -> String {
+    let component_name = filename.split('.').next().unwrap().to_string();
+    to_kebab_case(&component_name)
 }
 
 fn extract_filename(path: &str) -> String {
