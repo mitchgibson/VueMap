@@ -49,36 +49,6 @@ async fn nodes(query: web::Query<NodesQuery>) -> impl Responder {
   HttpResponse::Ok().json(response)
 }
 
-#[derive(Deserialize)]
-struct NodeQuery {
-    dir: Option<String>,
-    // Add other query parameters as needed
-}
-
-#[get("/node/{component}")]
-async fn node(path: web::Path<String>, query: web::Query<NodeQuery>,) -> impl Responder {
-  let component = path.into_inner();
-  let dir = query.dir.clone();
-  let crawl_results = crawl(dir.unwrap().as_str());
-
-  let mut count =  0;
-  let target = crawl_results.get(&component);
-    match target {
-        Some(target) => {
-            count += target.locations.len();
-        },
-        None => {
-            println!("Component not found");
-        }
-    }
-    
-  HttpResponse::Ok().json(json!({
-    "count": count,
-    "message": "Crawl completed successfully",
-    "node": target,
-  }))
-}
-
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
 
@@ -95,7 +65,6 @@ async fn main() -> std::io::Result<()> {
         .wrap(cors)
         .service(hello)
         .service(nodes)
-        .service(node)
 })
 .bind(("127.0.0.1", 3000))?
 .run()
