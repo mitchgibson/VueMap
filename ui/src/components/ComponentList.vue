@@ -1,0 +1,52 @@
+<template>
+  <div class="flex flex-col w-full h-full overflow-y-auto px-4 pb-4 gap-y-4 divide-y divide-surface-800">
+    <div v-for="item in data" class="flex flex-row w-full justify-between items-center">
+        <div class="flex flex-col w-full">
+          <div class="flex flex-row w-full justify-between items-center pt-4 pb-2">
+              <div class="flex flex-col gap-y-2">
+                <p>{{ item.component_name }}</p>
+                <div class="flex flex-row gap-x-4">
+                  <Badge severity="secondary" :value="`${item.locations.length} parents`" />
+                  <Badge severity="secondary" :value="`${item.children.length} children`" />
+                </div>
+              </div>
+              <div class="flex flex-row justify-end gap-x-2">
+                <Button icon="pi pi-copy" @click="copyToClipboard(item.filename)" title="Copy filename to clipboard" class="p-button-text p-button-sm" />
+                <Button icon="pi pi-share-alt" @click="componentsStore.focusComponent = item.component_name" class="p-button-text p-button-sm" />
+              </div>
+            </div>
+        </div>
+    </div>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import { useToast } from 'primevue/usetoast';
+import Button from 'primevue/button';
+import Badge from 'primevue/badge';
+import { toRefs } from 'vue';
+import { useComponentsStore } from '../stores/Components';
+import { Component } from '../types/Component';
+
+const props = withDefaults(
+  defineProps<{
+    data: Component[]
+  }>(),
+  {
+    data: () => []
+  }
+);
+const { data } = toRefs(props);
+const componentsStore = useComponentsStore();
+
+const { add: toast } = useToast();
+
+async function copyToClipboard(text: string) {
+  try {
+    await navigator.clipboard.writeText(text);
+    toast({ severity: 'success', detail: 'File copied to clipboard', life: 3000 });
+  } catch (err) {
+    toast({ severity: 'error', detail: 'File copied to clipboard', life: 3000 });
+  }
+}
+</script>

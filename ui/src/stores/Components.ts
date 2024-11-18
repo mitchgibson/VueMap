@@ -21,6 +21,7 @@ export const useComponentsStore = defineStore('ComponentLocation', () => {
   const count = computed(() => components.value.length);
   const focusComponent = ref<string>('');
   const graph = ref<{nodes: Node[], edges: Edge[]}>({ nodes: [], edges: [] });
+  const list = ref<Component[]>([]);
 
   watch(focusComponent, () => {
     buildGraph();
@@ -109,6 +110,7 @@ export const useComponentsStore = defineStore('ComponentLocation', () => {
         }, {});
       }
       components.value = toTreeNodes(data);
+      list.value = toList(data);
     } catch(err) {
       error.value = true;
     }
@@ -143,6 +145,10 @@ export const useComponentsStore = defineStore('ComponentLocation', () => {
     });
   }
 
+  function toList(data: {[key: string]: Component}) {
+    return Object.keys(data).map(key => data[key]);
+  }
+
   function getComponent(key: string) {
     return rawData.value[key];
   }
@@ -159,6 +165,7 @@ export const useComponentsStore = defineStore('ComponentLocation', () => {
     focusComponent,
     components,
     graph,
+    list,
     getComponent
   }
 });
