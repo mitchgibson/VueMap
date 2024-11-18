@@ -15,6 +15,7 @@ pub struct Location {
 #[derive(Debug, PartialEq, Serialize, Clone)]
 pub struct Node {
     pub component_name: String,
+    pub filename: String,
     pub locations: Vec<Location>,
     pub children: Vec<String>,
 }
@@ -64,6 +65,7 @@ pub fn crawl(dir: &str) -> HashMap<String, Node> {
             for component in components.iter() {
                 if !nodes.contains_key(component) {
                     nodes.insert(component.clone(), Node {
+                        filename: filename.to_string(),
                         component_name: component.clone(),
                         locations: vec![Location {
                             path: file_path_str.clone(),
@@ -151,6 +153,7 @@ fn tag_filter(tag: &str) -> bool {
     || tag.starts_with('#') 
     || tag.starts_with("{{")
     || tag.is_empty()
+    || tag == "slot"
 }
 
 fn extract_components(content: &str) -> Vec<String> {
@@ -163,7 +166,7 @@ fn extract_components(content: &str) -> Vec<String> {
             let end = start + 1 + end;
             let tag = content[start + 1..end].trim().to_string();
             // Ignore end tags and HTML void elements
-            if !tag_filter(&tag) {
+            if !tag_filter(&tag) && !components.contains(&tag) {
                 let component_name = tag.split_whitespace().next().unwrap_or(&tag).to_string();
                 components.push(to_kebab_case(component_name.as_str()));
             }

@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia';
 import { TreeNode } from 'primevue/treenode';
 import { computed, ref, watch } from 'vue';
-import { Location } from '../types/Location';
 import { Directory } from '../types/Directory';
 import { Node, Edge } from '@vue-flow/core';
 import { Component } from '../types/Component';
@@ -18,7 +17,6 @@ export const useComponentLocationStore = defineStore('ComponentLocation', () => 
   const query = ref<string>('');
   const loading = ref<boolean>(false);
   const error = ref<boolean>(false);
-  const exactMatch = ref<boolean>(true);
   const components = ref<TreeNode[]>([]);
   const count = computed(() => components.value.length);
   const focusComponent = ref<string>('');
@@ -28,6 +26,7 @@ export const useComponentLocationStore = defineStore('ComponentLocation', () => 
     if(focusComponent.value) {
       graph.value = { nodes: [], edges: [] };
       const focalPoint = rawData.value[focusComponent.value];
+      console.log("focalPoint", focalPoint);
       if(!focalPoint) return;
 
       graph.value.nodes.push({
@@ -47,7 +46,7 @@ export const useComponentLocationStore = defineStore('ComponentLocation', () => 
           id: location.component,
           type: 'input',
           position: { x: (i * 200) - parentMiddleX, y: 200 },
-          data: { label: location.filename },
+          data: { label: location.component },
         });
         graph.value.edges.push({
           id: `${location.component}->${focalPoint.component_name}`,
@@ -79,6 +78,20 @@ export const useComponentLocationStore = defineStore('ComponentLocation', () => 
     }
   });
 
+  async function load() {
+    loading.value = true;
+    error.value = false;
+    try {
+      const results = await fetch(`http://127.0.0.1:3000/nodes?dir=${directories.value?.join(',')}&exact=false`);
+      const data = await results.json();
+      rawData.value = data.nodes;
+      search();
+    } catch(err) {
+      error.value = true;
+    }
+    loading.value = false;
+  }
+
   async function search() {
     if(!directories.value) {
       return;
@@ -86,46 +99,56 @@ export const useComponentLocationStore = defineStore('ComponentLocation', () => 
     loading.value = true;
     error.value = false;
     try {
-      const results = await fetch(`http://127.0.0.1:3000/nodes?dir=${directories.value?.join(',')}&filter=${query.value}&exact=${exactMatch.value}`);
-      const data = await results.json();
-      rawData.value = data.nodes;
-      components.value = toTreeNodes(data.nodes); 
+      const filteredData = Object.keys(rawData.value).filter(key => key.includes(query.value));
+      let data = rawData.value;
+      if(query.value) {
+        data = filteredData.reduce((acc: {[key: string]: Component}, key) => {
+          acc[key] = rawData.value[key];
+          return acc;
+        }, {});
+      }
+      components.value = toTreeNodes(data);
     } catch(err) {
       error.value = true;
     }
     loading.value = false;
   }
-  search();
+
   watch(query, () => {
     search();
   });
-  watch(exactMatch, () => {
-    search();
-  });
+
   watch(directories, () => {
-    search();
+    load();
   });
 
-  function toTreeNodes(data: {[key: string]: {component_name:string, locations: Location[]}}): TreeNode[] {
+  function toTreeNodes(data: {[key: string]: Component}): TreeNode[] {
     return Object.keys(data).map(key => {
       return {
         key: key,
         label: data[key].component_name,
-        children: data[key].locations.map(location => {
-          return {
-            key: location.path,
-            label: location.filename,
-            data: location
-          }
-        })
+        data: {
+          filename: data[key].filename,
+          parents: data[key].locations.map(location => {
+            return {
+              key: location.path,
+              label: location.filename,
+              data: location
+            }
+          }),
+          children: data[key].children
+        }
       }
     });
   }
 
+  function getComponent(key: string) {
+    return rawData.value[key];
+  }
+
   return {
-    components,
+    load,
     search,
-    exactMatch,
     query,
     loading,
     error,
@@ -133,6 +156,8 @@ export const useComponentLocationStore = defineStore('ComponentLocation', () => 
     directoryOptions,
     count,
     focusComponent,
-    graph
+    components,
+    graph,
+    getComponent
   }
 });
