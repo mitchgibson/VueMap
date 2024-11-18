@@ -35,10 +35,10 @@ import Button from 'primevue/button';
 import Toast from 'primevue/toast';
 import ComponentLocationTable from './components/ComponentLocationTable.vue';
 import ComponentConnections from './components/ComponentConnections.vue';
-import { useComponentLocationStore } from './stores/ComponentLocation';
+import { useComponentsStore } from './stores/Components';
 import { onBeforeMount } from 'vue';
 
-const componentLocations = useComponentLocationStore();
+const componentLocations = useComponentsStore();
 
 function onClearClick() {
   componentLocations.query = '';

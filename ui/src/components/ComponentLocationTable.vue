@@ -30,7 +30,7 @@ import Column from 'primevue/column';
 import Button from 'primevue/button';
 import Badge from 'primevue/badge';
 import { toRefs } from 'vue';
-import { useComponentLocationStore } from '../stores/ComponentLocation';
+import { useComponentsStore } from '../stores/Components';
 
 const props = withDefaults(
   defineProps<{
@@ -41,7 +41,7 @@ const props = withDefaults(
   }
 );
 const { data } = toRefs(props);
-const componentLocationStore = useComponentLocationStore();
+const componentLocationStore = useComponentsStore();
 
 const { add: toast } = useToast();
 
