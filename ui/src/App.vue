@@ -2,7 +2,6 @@
   <Toast />
   <div class="w-full h-full flex flex-col">
     <div class="w-full flex flex-row items-center justify-start p-4">
-      <Button v-if="componentsStore.focusComponent" variant="text" icon="pi pi-angle-left" @click="componentsStore.focusComponent = ''" />
       <template v-if="!componentsStore.focusComponent">
         <FloatLabel variant="on" class="grow pr-4">
           <MultiSelect id="dir" class="w-full" v-model="componentsStore.directories" :options="componentsStore.directoryOptions" optionLabel="name" optionValue="value" />
