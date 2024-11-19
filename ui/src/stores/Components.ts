@@ -4,7 +4,6 @@ import { computed, ref, watch } from 'vue';
 import { Directory } from '../types/Directory';
 import { Node, Edge } from '@vue-flow/core';
 import { Component } from '../types/Component';
-import { useNavigationStore } from './Navigation';
 
 export const useComponentsStore = defineStore('ComponentLocation', () => {
   const directoryOptions:Directory[] = [
@@ -12,8 +11,6 @@ export const useComponentsStore = defineStore('ComponentLocation', () => {
     { name: 'Kui', value: '/Users/mitchdelachevrotiere/dev/knak/packages/kui/src' },
     { name: 'Enterprise', value: '/Users/mitchdelachevrotiere/dev/knak/packages/enterprise/resources' },
   ];
-
-  const navigationStore = useNavigationStore();
   
   const directories = ref(directoryOptions.map(d => d.value));
   const rawData = ref<{[key: string]: Component}>({});

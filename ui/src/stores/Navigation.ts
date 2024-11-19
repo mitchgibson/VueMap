@@ -36,9 +36,17 @@ export const useNavigationStore = defineStore('Navigation', () => {
     breadcrumbs.pop();
   }
 
+  function popTo(id: string) {
+    const index = breadcrumbs.findIndex(b => b.id === id);
+    if(index > -1) {
+      breadcrumbs.splice(index + 1);
+    }
+  }
+
   return {
     breadcrumbs: readonly(breadcrumbs),
     push,
     pop,
+    popTo,
   };
 });

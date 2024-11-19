@@ -20,7 +20,7 @@
       </div>
     </div>
     <div class="overflow-y-auto px-4 flex flex-row grow w-full">
-        <ComponentList v-if="!componentsStore.focusComponent" class="grow" :data="componentsStore.list" />
+      <ComponentList v-if="!componentsStore.focusComponent" class="grow" />
       <ComponentConnections v-if="componentsStore.focusComponent" />
     </div>
   </div>
