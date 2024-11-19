@@ -5,6 +5,7 @@
           <div class="flex flex-row w-full justify-between items-center pt-4 pb-2">
               <div class="flex flex-col gap-y-2">
                 <p>{{ item.component_name }}</p>
+                <p class="text-sm text-surface-400">{{ item.filename }}</p>
                 <div class="flex flex-row gap-x-4">
                   <Badge severity="secondary" :value="`${item.locations.length} parents`" />
                   <Badge severity="secondary" :value="`${item.children.length} children`" />
@@ -26,24 +27,23 @@ import Button from 'primevue/button';
 import Badge from 'primevue/badge';
 import { useComponentsStore } from '../stores/Components';
 import { Component } from '../types/Component';
-import { useNavigationStore } from '../stores/Navigation';
+import { useNavigator } from '../stores/Navigator';
 
 const componentsStore = useComponentsStore();
-const navigation = useNavigationStore();
 
 const { add: toast } = useToast();
 
 async function copyToClipboard(text: string) {
   try {
     await navigator.clipboard.writeText(text);
-    toast({ severity: 'success', detail: 'File copied to clipboard', life: 3000 });
+    toast({ severity: 'success', detail: 'Filename copied to clipboard', life: 3000 });
   } catch (err) {
-    toast({ severity: 'error', detail: 'File copied to clipboard', life: 3000 });
+    toast({ severity: 'error', detail: 'Copy failed', life: 3000 });
   }
 }
 
 function onConnectionsClick(item: Component) {
-  navigation.push({
+  useNavigator().push({
     id: item.component_name,
     label: item.component_name,
   });

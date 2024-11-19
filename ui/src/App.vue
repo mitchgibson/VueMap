@@ -20,8 +20,9 @@
       </div>
     </div>
     <div class="overflow-y-auto px-4 flex flex-row grow w-full">
-      <ComponentList v-if="!componentsStore.focusComponent" class="grow" />
-      <ComponentConnections v-if="componentsStore.focusComponent" />
+      <RouterView />
+      <!-- <ComponentList v-if="!componentsStore.focusComponent" class="grow" />
+      <ComponentConnections v-if="componentsStore.focusComponent" /> -->
     </div>
   </div>
 </template>
@@ -32,8 +33,8 @@ import MultiSelect from 'primevue/multiselect';
 import FloatLabel from 'primevue/floatlabel';
 import Button from 'primevue/button';
 import Toast from 'primevue/toast';
-import ComponentList from './components/ComponentList.vue';
-import ComponentConnections from './components/ComponentConnections.vue';
+// import ComponentList from './components/ComponentList.vue';
+// import ComponentConnections from './components/ComponentConnections.vue';
 import { useComponentsStore } from './stores/Components';
 import { onBeforeMount } from 'vue';
 

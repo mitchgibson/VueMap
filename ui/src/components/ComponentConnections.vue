@@ -7,11 +7,11 @@
     @node-click="onNodeClick">
     <template #node-special="specialNodeProps">
       <div class="vue-flow__node-default">
-        <DefaultNode v-bind="specialNodeProps" />
+        <Node v-bind="specialNodeProps" />
       </div>
     </template>
     <template #edge-special="specialEdgeProps">
-      <DefaultEdge v-bind="specialEdgeProps" />
+      <Edge v-bind="specialEdgeProps" />
     </template>
   </VueFlow>
 </div>
@@ -21,11 +21,11 @@
 <script lang="ts" setup>
 import { VueFlow, useVueFlow } from '@vue-flow/core'
 import { useComponentsStore } from '../stores/Components';
-import DefaultNode from './DefaultNode.vue';
-import DefaultEdge from './DefaultEdge.vue';
+import Node from './Node.vue';
+import Edge from './Edge.vue';
 import { useToast } from 'primevue';
-import { useNavigationStore } from '../stores/Navigation';
 import Breadcrumbs from './Breadcrumbs.vue';
+import { useNavigator } from '../stores/Navigator';
 
 const componentsStore = useComponentsStore();
 const { add: toast } = useToast();
@@ -35,7 +35,7 @@ onPaneReady((instance) => instance.fitView())
 
 function onNodeClick(data: { node: { id: string }}) {
   if(componentsStore.getComponent(data.node.id)) {
-    useNavigationStore().push({
+    useNavigator().push({
       id: data.node.id,
       label: data.node.id,
     });
