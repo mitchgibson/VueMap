@@ -45,7 +45,7 @@ function onClearClick() {
 }
 
 onBeforeMount(() => {
-  componentsStore.load();
+  componentsStore.loadSettings();
 });
 
 </script>

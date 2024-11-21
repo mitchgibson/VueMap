@@ -6,7 +6,7 @@ import { Node, Edge } from '@vue-flow/core';
 import { Component } from '../types/Component';
 
 export const useComponentsStore = defineStore('ComponentLocation', () => {
-  const directoryOptions:Directory[] = [
+  let directoryOptions:Directory[] = [
     { name: 'Builder', value: '/Users/mitchdelachevrotiere/dev/knak/packages/builder/src' },
     { name: 'Kui', value: '/Users/mitchdelachevrotiere/dev/knak/packages/kui/src' },
     { name: 'Enterprise', value: '/Users/mitchdelachevrotiere/dev/knak/packages/enterprise/resources' },
@@ -80,10 +80,31 @@ export const useComponentsStore = defineStore('ComponentLocation', () => {
     }
   }
 
+  async function loadSettings() {
+    const results = await fetch(`http://127.0.0.1:3000/settings`);
+    const data = await results.json();
+    if(!data || !data.scopes || data.scopes.length === 0) {
+      await fetch(`http://127.0.0.1:3000/settings`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          scopes: directoryOptions
+        })
+      });
+    }
+    directoryOptions = data.scopes as Directory[];
+    directories.value = directoryOptions.map(d => d.value);
+  }
+
   async function load() {
     loading.value = true;
     error.value = false;
     try {
+      if(!directories.value || directories.value.length === 0) {
+        return;
+      }
       const results = await fetch(`http://127.0.0.1:3000/nodes?dir=${directories.value?.join(',')}&exact=false`);
       const data = await results.json();
       rawData.value = data.nodes;
@@ -154,7 +175,7 @@ export const useComponentsStore = defineStore('ComponentLocation', () => {
   }
 
   return {
-    load,
+    loadSettings,
     search,
     query,
     loading,

@@ -1,10 +1,12 @@
 mod crawler;
 mod casing;
+mod settings;
 
 use actix_cors::Cors;
-use actix_web::{get, http, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{get, post, http, web, App, HttpResponse, HttpServer, Responder};
 use serde::Deserialize;
 use crawler::crawler::crawl;
+use settings::settings::{read_settings, write_settings};
 use serde_json::json;
 use casing::casing::{to_kebab_case, to_pascal_case};
 
@@ -49,6 +51,17 @@ async fn nodes(query: web::Query<NodesQuery>) -> impl Responder {
   HttpResponse::Ok().json(response)
 }
 
+#[get("/settings")]
+async fn get_settings() -> impl Responder {
+  HttpResponse::Ok().json(read_settings())
+}
+
+#[post("/settings")]
+async fn post_settings(settings: web::Json<settings::settings::Settings>) -> impl Responder {
+  write_settings(&settings);
+  HttpResponse::Ok().json(settings)
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
 
@@ -65,6 +78,8 @@ async fn main() -> std::io::Result<()> {
         .wrap(cors)
         .service(hello)
         .service(nodes)
+        .service(get_settings)
+        .service(post_settings)
 })
 .bind(("127.0.0.1", 3000))?
 .run()
