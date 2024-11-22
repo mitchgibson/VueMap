@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Breadcrumb as NavBreadcrumb, useNavigator } from '../stores/Navigator';
+import { Breadcrumb as NavBreadcrumb, useNavigator } from '../../stores/Navigator';
 import Breadcrumb from 'primevue/breadcrumb';
 
 const navigator = useNavigator();

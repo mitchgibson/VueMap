@@ -20,12 +20,12 @@
 
 <script lang="ts" setup>
 import { VueFlow, useVueFlow } from '@vue-flow/core'
-import { useComponentsStore } from '../stores/Components';
+import { useComponentsStore } from '../../stores/Components';
 import Node from './Node.vue';
 import Edge from './Edge.vue';
 import { useToast } from 'primevue';
-import Breadcrumbs from './Breadcrumbs.vue';
-import { useNavigator } from '../stores/Navigator';
+import Breadcrumbs from '../navigation/Breadcrumbs.vue';
+import { useNavigator } from '../../stores/Navigator';
 
 const componentsStore = useComponentsStore();
 const { add: toast } = useToast();

@@ -1,18 +1,18 @@
 <template>
 
   <div class="flex flex-col w-full h-full">
-    <div class="w-full flex flex-row items-center justify-start py-4">
-      <FloatLabel variant="on" class="grow pr-4">
-          <MultiSelect id="dir" class="w-full" v-model="componentsStore.directories" :options="componentsStore.directoryOptions" optionLabel="name" optionValue="value" />
-          <label for="dir">Directory...</label>
-        </FloatLabel>
-        <FloatLabel variant="on">
-          <InputText id="component_search" v-model="componentsStore.query" />
-          <label for="component_search">Component...</label>
-        </FloatLabel>
-        <Button icon="pi pi-times-circle" @click="onClearClick" :disabled="!componentsStore.query" class="p-button-text p-button-sm" />
-    </div>
     <Async :loading="componentsStore.$loading" :error="componentsStore.$error">
+      <div class="w-full flex flex-row items-center justify-start py-4">
+        <FloatLabel variant="on" class="grow pr-4">
+            <MultiSelect id="dir" class="w-full" v-model="componentsStore.directories" :options="componentsStore.directoryOptions" optionLabel="name" optionValue="value" />
+            <label for="dir">Directory...</label>
+          </FloatLabel>
+          <FloatLabel variant="on">
+            <InputText id="component_search" v-model="componentsStore.query" />
+            <label for="component_search">Component...</label>
+          </FloatLabel>
+          <Button icon="pi pi-times-circle" @click="onClearClick" :disabled="!componentsStore.query" class="p-button-text p-button-sm" />
+      </div>
       <div class="flex flex-col w-full h-full overflow-y-auto">
         <div class="w-full flex flex-row items-center justify-end px-4">
           <div class="flex flex-row items-center justify-end gap-x-2">
@@ -51,10 +51,10 @@ import Badge from 'primevue/badge';
 import InputText from 'primevue/inputtext';
 import MultiSelect from 'primevue/multiselect';
 import FloatLabel from 'primevue/floatlabel';
-import { useComponentsStore } from '../stores/Components';
-import { ComponentStruct } from '../structs/Component';
-import { useNavigator } from '../stores/Navigator';
-import Async from './Async.vue';
+import { useComponentsStore } from '../../stores/Components';
+import { ComponentStruct } from '../../structs/Component';
+import { useNavigator } from '../../stores/Navigator';
+import Async from '../state/Async.vue';
 
 const componentsStore = useComponentsStore();
 

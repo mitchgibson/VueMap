@@ -12,7 +12,7 @@
 <script setup lang="ts">
 import Toast from 'primevue/toast';
 import { useSettingsStore } from './stores/Settings';
-import Async from './components/Async.vue';
+import Async from './components/state/Async.vue';
 
 const settingsStore = useSettingsStore();
 settingsStore.init();

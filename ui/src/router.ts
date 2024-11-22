@@ -1,6 +1,6 @@
 import { createMemoryHistory, createRouter, RouteRecordRaw } from 'vue-router'
-import ComponentList from './components/ComponentList.vue'
-import ComponentConnections from './components/ComponentConnections.vue'
+import ComponentList from './components/component/ComponentList.vue'
+import ComponentConnections from './components/component/ComponentConnections.vue'
 
 const routes: RouteRecordRaw[] = [
   { 
