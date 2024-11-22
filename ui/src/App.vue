@@ -1,21 +1,19 @@
 <template>
   <Toast />
   <div class="w-full h-full flex flex-col">
-    <div class="overflow-y-auto px-4 flex flex-row grow w-full">
-      <RouterView />
+    <div class="px-4 w-full h-full">
+      <Async :loading="settingsStore.$loading" :error="settingsStore.$error">
+        <RouterView />
+      </Async>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import Toast from 'primevue/toast';
-import { useComponentsStore } from './stores/Components';
-import { onBeforeMount } from 'vue';
+import { useSettingsStore } from './stores/Settings';
+import Async from './components/Async.vue';
 
-const componentsStore = useComponentsStore();
-
-onBeforeMount(() => {
-  componentsStore.loadSettings(); // TODO: move settings to its own store
-});
-
+const settingsStore = useSettingsStore();
+settingsStore.init();
 </script>

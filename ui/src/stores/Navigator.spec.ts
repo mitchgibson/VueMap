@@ -61,6 +61,28 @@ describe("Navigator", () => {
     ]);
   });
 
+  test("push does nothing if breadcrumb already exists at last index", () => {
+    const navigator = useNavigator();
+    navigator.push({
+      id: "test",
+      label: "Test",
+    });
+    navigator.push({
+      id: "test",
+      label: "Test",
+    });
+    expect(navigator.breadcrumbs).toEqual([
+      {
+        id: "",
+        label: "Home",
+      },
+      {
+        id: "test",
+        label: "Test",
+      },
+    ]);
+  });
+
   test("pop removes breadcrumbs", () => {
     const navigator = useNavigator();
     navigator.push({

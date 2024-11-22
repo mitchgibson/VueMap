@@ -12,31 +12,35 @@
         </FloatLabel>
         <Button icon="pi pi-times-circle" @click="onClearClick" :disabled="!componentsStore.query" class="p-button-text p-button-sm" />
     </div>
-    <div class="w-full flex flex-row items-center justify-end px-4">
-      <div class="flex flex-row items-center justify-end gap-x-2">
-        <div class="text-sm text-surface-400">Found {{ componentsStore.count }} components</div>
-      </div>
-    </div>
-    <div class="flex flex-col w-full h-full overflow-y-auto px-4 pb-4 gap-y-4 divide-y divide-surface-800">
-      <div v-for="item in componentsStore.list" class="flex flex-row w-full justify-between items-center">
-        <div class="flex flex-col w-full">
-          <div class="flex flex-row w-full justify-between items-center pt-4 pb-2">
-              <div class="flex flex-col gap-y-2">
-                <p>{{ item.component_name }}</p>
-                <p class="text-sm text-surface-400">{{ item.filename }}</p>
-                <div class="flex flex-row gap-x-4">
-                  <Badge severity="secondary" :value="`${item.locations.length} parents`" />
-                  <Badge severity="secondary" :value="`${item.children.length} children`" />
-                </div>
-              </div>
-              <div class="flex flex-row justify-end gap-x-2">
-                <Button icon="pi pi-copy" @click="copyToClipboard(item.filename)" title="Copy filename to clipboard" class="p-button-text p-button-sm" />
-                <Button icon="pi pi-share-alt" @click="onConnectionsClick(item)" class="p-button-text p-button-sm" />
-              </div>
-            </div>
+    <Async :loading="componentsStore.$loading" :error="componentsStore.$error">
+      <div class="flex flex-col w-full h-full overflow-y-auto">
+        <div class="w-full flex flex-row items-center justify-end px-4">
+          <div class="flex flex-row items-center justify-end gap-x-2">
+            <div class="text-sm text-surface-400">Found {{ componentsStore.count }} components</div>
+          </div>
         </div>
-    </div>
-    </div>
+        <div class="flex flex-col w-full h-full overflow-y-auto px-4 pb-4 gap-y-4 divide-y divide-surface-800">
+          <div v-for="item in componentsStore.list" class="flex flex-row w-full justify-between items-center">
+            <div class="flex flex-col w-full">
+              <div class="flex flex-row w-full justify-between items-center pt-4 pb-2">
+                  <div class="flex flex-col gap-y-2">
+                    <p>{{ item.component_name }}</p>
+                    <p class="text-sm text-surface-400">{{ item.filename }}</p>
+                    <div class="flex flex-row gap-x-4">
+                      <Badge severity="secondary" :value="`${item.locations.length} parents`" />
+                      <Badge severity="secondary" :value="`${item.children.length} children`" />
+                    </div>
+                  </div>
+                  <div class="flex flex-row justify-end gap-x-2">
+                    <Button icon="pi pi-copy" @click="copyToClipboard(item.filename)" title="Copy filename to clipboard" class="p-button-text p-button-sm" />
+                    <Button icon="pi pi-share-alt" @click="onConnectionsClick(item)" class="p-button-text p-button-sm" />
+                  </div>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Async>
   </div>
 </template>
 
@@ -48,8 +52,9 @@ import InputText from 'primevue/inputtext';
 import MultiSelect from 'primevue/multiselect';
 import FloatLabel from 'primevue/floatlabel';
 import { useComponentsStore } from '../stores/Components';
-import { Component } from '../types/Component';
+import { ComponentStruct } from '../structs/Component';
 import { useNavigator } from '../stores/Navigator';
+import Async from './Async.vue';
 
 const componentsStore = useComponentsStore();
 
@@ -68,7 +73,7 @@ async function copyToClipboard(text: string) {
   }
 }
 
-function onConnectionsClick(item: Component) {
+function onConnectionsClick(item: ComponentStruct) {
   useNavigator().push({
     id: item.component_name,
     label: item.component_name,

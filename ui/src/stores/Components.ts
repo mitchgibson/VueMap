@@ -1,27 +1,27 @@
 import { defineStore } from 'pinia';
 import { TreeNode } from 'primevue/treenode';
 import { computed, ref, watch } from 'vue';
-import { Directory } from '../types/Directory';
+import { DirectoryStruct } from '../structs/Directory';
 import { Node, Edge } from '@vue-flow/core';
-import { Component } from '../types/Component';
+import { ComponentStruct } from '../structs/Component';
+import { useSettingsStore } from './Settings';
 
 export const useComponentsStore = defineStore('ComponentLocation', () => {
-  let directoryOptions:Directory[] = [
-    { name: 'Builder', value: '/Users/mitchdelachevrotiere/dev/knak/packages/builder/src' },
-    { name: 'Kui', value: '/Users/mitchdelachevrotiere/dev/knak/packages/kui/src' },
-    { name: 'Enterprise', value: '/Users/mitchdelachevrotiere/dev/knak/packages/enterprise/resources' },
-  ];
+  const settingsStore = useSettingsStore();
+  const directoryOptions = ref<DirectoryStruct[]>(settingsStore.$settings.scopes);
   
-  const directories = ref(directoryOptions.map(d => d.value));
-  const rawData = ref<{[key: string]: Component}>({});
+  const directories = ref(directoryOptions.value.map(d => d.value));
+  const rawData = ref<{[key: string]: ComponentStruct}>({});
   const query = ref<string>('');
-  const loading = ref<boolean>(false);
-  const error = ref<boolean>(false);
   const components = ref<TreeNode[]>([]);
   const count = computed(() => components.value.length);
   const focusComponent = ref<string>('');
   const graph = ref<{nodes: Node[], edges: Edge[]}>({ nodes: [], edges: [] });
-  const list = ref<Component[]>([]);
+  const list = ref<ComponentStruct[]>([]);
+  const $loading = ref<boolean>(false);
+  const $error = ref<boolean>(false);
+
+  load();
 
   watch(focusComponent, () => {
     buildGraph();
@@ -80,27 +80,27 @@ export const useComponentsStore = defineStore('ComponentLocation', () => {
     }
   }
 
-  async function loadSettings() {
-    const results = await fetch(`http://127.0.0.1:3000/settings`);
-    const data = await results.json();
-    if(!data || !data.scopes || data.scopes.length === 0) {
-      await fetch(`http://127.0.0.1:3000/settings`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          scopes: directoryOptions
-        })
-      });
-    }
-    directoryOptions = data.scopes as Directory[];
-    directories.value = directoryOptions.map(d => d.value);
-  }
+  // async function loadSettings() {
+  //   const results = await fetch(`http://127.0.0.1:3000/settings`);
+  //   const data = await results.json();
+  //   if(!data || !data.scopes || data.scopes.length === 0) {
+  //     await fetch(`http://127.0.0.1:3000/settings`, {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json'
+  //       },
+  //       body: JSON.stringify({
+  //         scopes: directoryOptions
+  //       })
+  //     });
+  //   }
+  //   directoryOptions = data.scopes as DirectoryStruct[];
+  //   directories.value = directoryOptions.map(d => d.value);
+  // }
 
   async function load() {
-    loading.value = true;
-    error.value = false;
+    $loading.value = true;
+    $error.value = false;
     try {
       if(!directories.value || directories.value.length === 0) {
         return;
@@ -110,22 +110,22 @@ export const useComponentsStore = defineStore('ComponentLocation', () => {
       rawData.value = data.nodes;
       search();
     } catch(err) {
-      error.value = true;
+      $error.value = true;
     }
-    loading.value = false;
+    $loading.value = false;
   }
 
   async function search() {
     if(!directories.value) {
       return;
     }
-    loading.value = true;
-    error.value = false;
+    $loading.value = true;
+    $error.value = false;
     try {
       const filteredData = Object.keys(rawData.value).filter(key => key.includes(query.value));
       let data = rawData.value;
       if(query.value) {
-        data = filteredData.reduce((acc: {[key: string]: Component}, key) => {
+        data = filteredData.reduce((acc: {[key: string]: ComponentStruct}, key) => {
           acc[key] = rawData.value[key];
           return acc;
         }, {});
@@ -133,9 +133,9 @@ export const useComponentsStore = defineStore('ComponentLocation', () => {
       components.value = toTreeNodes(data);
       list.value = toList(data);
     } catch(err) {
-      error.value = true;
+      $error.value = true;
     }
-    loading.value = false;
+    $loading.value = false;
   }
 
   watch(query, () => {
@@ -146,7 +146,7 @@ export const useComponentsStore = defineStore('ComponentLocation', () => {
     load();
   });
 
-  function toTreeNodes(data: {[key: string]: Component}): TreeNode[] {
+  function toTreeNodes(data: {[key: string]: ComponentStruct}): TreeNode[] {
     return Object.keys(data).map(key => {
       return {
         key: key,
@@ -166,7 +166,7 @@ export const useComponentsStore = defineStore('ComponentLocation', () => {
     });
   }
 
-  function toList(data: {[key: string]: Component}) {
+  function toList(data: {[key: string]: ComponentStruct}) {
     return Object.keys(data).map(key => data[key]);
   }
 
@@ -175,11 +175,11 @@ export const useComponentsStore = defineStore('ComponentLocation', () => {
   }
 
   return {
-    loadSettings,
+    // loadSettings,
     search,
     query,
-    loading,
-    error,
+    $loading,
+    $error,
     directories,
     directoryOptions,
     count,
