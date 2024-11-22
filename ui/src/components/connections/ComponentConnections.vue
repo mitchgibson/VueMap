@@ -1,6 +1,5 @@
 <template>
 <div class="flex flex-col w-full h-full">
-  <Breadcrumbs />
   <VueFlow 
     :nodes="componentsStore.graph.nodes" 
     :edges="componentsStore.graph.edges"
@@ -24,7 +23,6 @@ import { useComponentsStore } from '../../stores/Components';
 import Node from './Node.vue';
 import Edge from './Edge.vue';
 import { useToast } from 'primevue';
-import Breadcrumbs from '../navigation/Breadcrumbs.vue';
 import { useNavigator } from '../../stores/Navigator';
 
 const componentsStore = useComponentsStore();

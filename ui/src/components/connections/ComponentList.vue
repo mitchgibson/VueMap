@@ -2,7 +2,8 @@
 
   <div class="flex flex-col w-full h-full">
     <Async :loading="componentsStore.$loading" :error="componentsStore.$error">
-      <div class="w-full flex flex-row items-center justify-start py-4">
+      <ComponentListFilters class="py-4" />
+      <!-- <div class="w-full flex flex-row items-center justify-start py-4">
         <FloatLabel variant="on" class="grow pr-4">
             <MultiSelect id="dir" class="w-full" v-model="componentsStore.directories" :options="componentsStore.directoryOptions" optionLabel="name" optionValue="value" />
             <label for="dir">Directory...</label>
@@ -12,7 +13,7 @@
             <label for="component_search">Component...</label>
           </FloatLabel>
           <Button icon="pi pi-times-circle" @click="onClearClick" :disabled="!componentsStore.query" class="p-button-text p-button-sm" />
-      </div>
+      </div> -->
       <div class="flex flex-col w-full h-full overflow-y-auto">
         <div class="w-full flex flex-row items-center justify-end px-4">
           <div class="flex flex-row items-center justify-end gap-x-2">
@@ -48,21 +49,22 @@
 import { useToast } from 'primevue/usetoast';
 import Button from 'primevue/button';
 import Badge from 'primevue/badge';
-import InputText from 'primevue/inputtext';
-import MultiSelect from 'primevue/multiselect';
-import FloatLabel from 'primevue/floatlabel';
+// import InputText from 'primevue/inputtext';
+// import MultiSelect from 'primevue/multiselect';
+// import FloatLabel from 'primevue/floatlabel';
 import { useComponentsStore } from '../../stores/Components';
 import { ComponentStruct } from '../../structs/Component';
 import { useNavigator } from '../../stores/Navigator';
 import Async from '../state/Async.vue';
+import ComponentListFilters from './ComponentListFilters.vue';
 
 const componentsStore = useComponentsStore();
 
 const { add: toast } = useToast();
 
-function onClearClick() {
-  componentsStore.query = '';
-}
+// function onClearClick() {
+//   componentsStore.query = '';
+// }
 
 async function copyToClipboard(text: string) {
   try {

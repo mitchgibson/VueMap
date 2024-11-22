@@ -3,7 +3,12 @@
   <div class="w-full h-full flex flex-col">
     <div class="px-4 w-full h-full">
       <Async :loading="settingsStore.$loading" :error="settingsStore.$error">
-        <RouterView />
+        <div class="flex flex-row w-full h-20 items-center justify-between">
+          <RouterView name="headerLeft" />
+          <RouterView name="headerCenter" />
+          <RouterView name="headerRight" />
+        </div>
+        <RouterView name="content" />
       </Async>
     </div>
   </div>

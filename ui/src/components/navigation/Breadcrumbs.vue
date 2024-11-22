@@ -20,6 +20,6 @@ function onClick(item: NavBreadcrumb) {
 
 <style>
 .p-breadcrumb {
-  @apply bg-transparent;
+  background: transparent !important;
 }
 </style>
