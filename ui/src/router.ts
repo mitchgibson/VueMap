@@ -8,6 +8,7 @@ const routes: RouteRecordRaw[] = [
     path: '/', 
     components: {
       content: ComponentList,
+      headerLeft: Breadcrumbs,
     },
   },
   { 

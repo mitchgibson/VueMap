@@ -1,16 +1,14 @@
 <template>
   <Toast />
   <div class="w-full h-full flex flex-col">
-    <div class="px-4 w-full h-full">
-      <Async :loading="settingsStore.$loading" :error="settingsStore.$error">
-        <div class="flex flex-row w-full h-20 items-center justify-between">
-          <RouterView name="headerLeft" />
-          <RouterView name="headerCenter" />
-          <RouterView name="headerRight" />
-        </div>
-        <RouterView name="content" />
-      </Async>
-    </div>
+    <Async :loading="settingsStore.$loading" :error="settingsStore.$error">
+      <div class="flex flex-row w-full h-20 items-center justify-between bg-surface-900">
+        <RouterView name="headerLeft" />
+        <RouterView name="headerCenter" />
+        <RouterView name="headerRight" />
+      </div>
+      <RouterView name="content" />
+    </Async>
   </div>
 </template>
 

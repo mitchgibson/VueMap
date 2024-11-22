@@ -1,7 +1,5 @@
 <template>
-
-  <div class="flex flex-col w-full h-full">
-    <Async :loading="componentsStore.$loading" :error="componentsStore.$error">
+<Async :loading="componentsStore.$loading" :error="componentsStore.$error">
       <ComponentListFilters class="py-4" />
       <!-- <div class="w-full flex flex-row items-center justify-start py-4">
         <FloatLabel variant="on" class="grow pr-4">
@@ -14,13 +12,8 @@
           </FloatLabel>
           <Button icon="pi pi-times-circle" @click="onClearClick" :disabled="!componentsStore.query" class="p-button-text p-button-sm" />
       </div> -->
-      <div class="flex flex-col w-full h-full overflow-y-auto">
-        <div class="w-full flex flex-row items-center justify-end px-4">
-          <div class="flex flex-row items-center justify-end gap-x-2">
-            <div class="text-sm text-surface-400">Found {{ componentsStore.count }} components</div>
-          </div>
-        </div>
-        <div class="flex flex-col w-full h-full overflow-y-auto px-4 pb-4 gap-y-4 divide-y divide-surface-800">
+      <div class="flex flex-row grow overflow-auto">
+        <div class="flex flex-col w-full px-4 pb-4 gap-y-4 divide-y divide-surface-800">
           <div v-for="item in componentsStore.list" class="flex flex-row w-full justify-between items-center">
             <div class="flex flex-col w-full">
               <div class="flex flex-row w-full justify-between items-center pt-4 pb-2">
@@ -41,8 +34,10 @@
           </div>
         </div>
       </div>
+      <div class="flex flex-row items-center justify-end gap-x-2">
+        <div class="text-sm text-surface-400">Found {{ componentsStore.count }} components</div>
+      </div>
     </Async>
-  </div>
 </template>
 
 <script lang="ts" setup>
