@@ -33,6 +33,10 @@ export const useNavigator = defineStore("Navigation", () => {
   });
 
   function push(breadcrumb: Breadcrumb) {
+    const index = breadcrumbs.findIndex((b) => b.id === breadcrumb.id);
+    if (index > 0 && index === breadcrumbs.length - 1) {
+      return;
+    }
     breadcrumbs.push({
       ...breadcrumb,
     });

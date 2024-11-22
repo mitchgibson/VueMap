@@ -17,3 +17,9 @@ function onClick(item: NavBreadcrumb) {
 }
 
 </script>
+
+<style>
+.p-breadcrumb {
+  @apply bg-transparent;
+}
+</style>
