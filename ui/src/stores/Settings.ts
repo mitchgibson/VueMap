@@ -43,11 +43,16 @@ export const useSettingsStore = defineStore('Settings', () => {
     return send();
   }
 
+  function updateSettings(data: SettingsStruct) {
+    $settings.value = data;
+    update(data);
+  }
+
   return {
-    $settings,
+    $settings: readonly($settings),
     $loading,
     $error,
     init,
-    update
+    updateSettings
   }
 });

@@ -5,12 +5,12 @@
       "value": "/Users/mitchdelachevrotiere/dev/knak/packages/builder/src"
     },
     {
-      "name": "Kui",
-      "value": "/Users/mitchdelachevrotiere/dev/knak/packages/kui/src"
-    },
-    {
       "name": "Enterprise",
       "value": "/Users/mitchdelachevrotiere/dev/knak/packages/enterprise/resources"
+    },
+    {
+      "name": "Kui",
+      "value": "/Users/mitchdelachevrotiere/dev/knak/packages/kui/src"
     }
   ]
 }

@@ -10,9 +10,9 @@
           </div>
           <div class="flex flex-row items-center justify-end">
             <RouterView name="headerRight" />
-            <RouterLink to="/settings">
+            <NavLink to="/settings" label="Settings">
               <Button severity="secondary" title="Settings" icon="pi pi-cog" class="p-button-text p-button-sm" />
-            </RouterLink>
+            </NavLink>
           </div>
         </div>
         <div class="px-5 pb-2 text-xs">
@@ -34,6 +34,7 @@ import Breadcrumb from './components/navigation/Breadcrumbs.vue';
 
 const settingsStore = useSettingsStore();
 import { useNavigator } from './stores/navigator/Navigator';
+import NavLink from './components/navigation/NavLink.vue';
 settingsStore.init().then(() => {
   useNavigator();
 })
