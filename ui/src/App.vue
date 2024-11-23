@@ -33,7 +33,7 @@ import RouterTitle from './components/navigation/RouterTitle.vue';
 import Breadcrumb from './components/navigation/Breadcrumbs.vue';
 
 const settingsStore = useSettingsStore();
-import { useNavigator } from './stores/Navigator';
+import { useNavigator } from './stores/navigator/Navigator';
 settingsStore.init().then(() => {
   useNavigator();
 })

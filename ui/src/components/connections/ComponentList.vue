@@ -35,7 +35,7 @@ import Button from 'primevue/button';
 import Badge from 'primevue/badge';
 import { useComponentsStore } from '../../stores/Components';
 import { ComponentStruct } from '../../structs/Component';
-import { useNavigator } from '../../stores/Navigator';
+import { useNavigator } from '../../stores/navigator/Navigator';
 import Async from '../state/Async.vue';
 import ComponentListFilters from './ComponentListFilters.vue';
 import Footer from '../navigation/Footer.vue';
@@ -55,20 +55,12 @@ async function copyToClipboard(text: string) {
 }
 
 function onConnectionsClick(item: ComponentStruct) {
-  componentsStore.focusComponent = item.component_name;
-  navigate.go({
+  navigate.next({
     path: `/component-connections/${item.component_name}`,
-    breadcrumbs: [
-      ...navigate.breadcrumbs,
-      {
-        id: item.component_name,
-        label: item.component_name,
-      }
-    ]
-  })
-  useNavigator().push({
-    id: item.component_name,
     label: item.component_name,
+    command: () => {
+      componentsStore.focusComponent = item.component_name;
+    }
   });
 }
 

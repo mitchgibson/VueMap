@@ -9,7 +9,7 @@ const routes: RouteRecordRaw[] = [
       content: ComponentList,
     },
     meta: {
-      title: 'Component List'
+      title: 'Home'
     }
   },
   { 

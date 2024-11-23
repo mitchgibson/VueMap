@@ -23,7 +23,7 @@ import { useComponentsStore } from '../../stores/Components';
 import Node from './Node.vue';
 import Edge from './Edge.vue';
 import { useToast } from 'primevue';
-import { useNavigator } from '../../stores/Navigator';
+import { useNavigator } from '../../stores/navigator/Navigator';
 
 const componentsStore = useComponentsStore();
 const { add: toast } = useToast();
@@ -33,9 +33,12 @@ onPaneReady((instance) => instance.fitView())
 
 function onNodeClick(data: { node: { id: string }}) {
   if(componentsStore.getComponent(data.node.id)) {
-    useNavigator().push({
-      id: data.node.id,
+    useNavigator().next({
+      path: `/component-connections/${data.node.id}`,
       label: data.node.id,
+      command: () => {
+        componentsStore.focusComponent = data.node.id;
+      }
     });
   } else {
     toast({ severity: 'error', detail: 'Component not found. Likely this component is not referenced in a template', life: 3000 });
