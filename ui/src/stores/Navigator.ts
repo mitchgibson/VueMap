@@ -1,7 +1,15 @@
 import { defineStore } from "pinia";
-import { reactive, readonly, watch } from "vue";
+import { reactive, readonly, ref, watch } from "vue";
 import { useComponentsStore } from "./Components";
-import { useRouter } from "vue-router";
+import { RouteRecord, useRouter } from "vue-router";
+
+/* 
+TODO: Update functionality to:
+- go: push route to stack, navigate to route
+- popTo: pop stack to route, navigate to route
+- no more breadcrumbs, instead use route stack for breadcrumbs
+- breadcrumbs: computed value of array of routes with breadcrumbs
+*/
 
 export type Breadcrumb = {
   id: string;
@@ -9,10 +17,15 @@ export type Breadcrumb = {
   command?: () => void;
 };
 
-export const useNavigator = defineStore("Navigation", () => {
-  const router = useRouter();
-  const componentsStore = useComponentsStore();
+export type NavigatorRoute = Partial<RouteRecord> & {
+  path: string;
+  meta?: {
+    title?: string;
+  };
+  breadcrumbs?: Breadcrumb[];
+}
 
+export const useNavigator = defineStore("Navigation", () => {
   const defaultBreadcrumbs = [
     {
       id: "",
@@ -20,7 +33,14 @@ export const useNavigator = defineStore("Navigation", () => {
     },
   ];
 
+  const router = useRouter();
+  const componentsStore = useComponentsStore();
+  const $pageTitle = ref<string>("");
   const breadcrumbs = reactive<Breadcrumb[]>([...defaultBreadcrumbs]);
+
+  watch(router.currentRoute, () => {
+    setPageTitle(router.currentRoute.value.meta['title'] as string || '');
+  }, { immediate: true, flush: 'pre'});
 
   watch(breadcrumbs, () => {
     if (breadcrumbs.length === 0) {
@@ -53,10 +73,28 @@ export const useNavigator = defineStore("Navigation", () => {
     }
   }
 
+  function setPageTitle(title:string) {
+    $pageTitle.value = title;
+  }
+
+  function go(route: NavigatorRoute) {
+    router.push(route);
+    if(route.meta?.title) setPageTitle(route.meta?.title || '');
+    if(route?.breadcrumbs) setBreadcrumbs(route.breadcrumbs);
+  }
+
+  function setBreadcrumbs(crumbs: Breadcrumb[]) {
+    breadcrumbs.length = 0;
+    breadcrumbs.push(...crumbs);
+  }
+
   return {
     breadcrumbs: readonly(breadcrumbs),
     push,
     pop,
     popTo,
+    $pageTitle,
+    setPageTitle,
+    go,
   };
 });

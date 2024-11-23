@@ -1,5 +1,5 @@
 <template>
-  <div v-if="loading" class="flex flex-row gap-x-2 w-full justify-center">
+  <div v-if="loading" class="flex flex-row gap-x-2 w-full h-full items-center justify-center">
     <Skeleton shape="circle" size="4rem" class="mr-2"></Skeleton>
     <Skeleton shape="circle" size="4rem" class="mr-2"></Skeleton>
     <Skeleton shape="circle" size="4rem" class="mr-2"></Skeleton>

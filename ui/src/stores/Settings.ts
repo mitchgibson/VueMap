@@ -27,7 +27,7 @@ export const useSettingsStore = defineStore('Settings', () => {
     });
   }
 
-  function init() {
+  function init(): Promise<void> {
     $loading.value = true;
     $error.value = false;
     const { onSuccess, onError, send } = useAsync<SettingsStruct>(loadSettings, { lazy: true });
@@ -40,7 +40,7 @@ export const useSettingsStore = defineStore('Settings', () => {
       $loading.value = false;
       logger.error(e);
     })
-    send();
+    return send();
   }
 
   return {

@@ -1,17 +1,6 @@
 <template>
 <Async :loading="componentsStore.$loading" :error="componentsStore.$error">
       <ComponentListFilters class="py-4" />
-      <!-- <div class="w-full flex flex-row items-center justify-start py-4">
-        <FloatLabel variant="on" class="grow pr-4">
-            <MultiSelect id="dir" class="w-full" v-model="componentsStore.directories" :options="componentsStore.directoryOptions" optionLabel="name" optionValue="value" />
-            <label for="dir">Directory...</label>
-          </FloatLabel>
-          <FloatLabel variant="on">
-            <InputText id="component_search" v-model="componentsStore.query" />
-            <label for="component_search">Component...</label>
-          </FloatLabel>
-          <Button icon="pi pi-times-circle" @click="onClearClick" :disabled="!componentsStore.query" class="p-button-text p-button-sm" />
-      </div> -->
       <div class="flex flex-row grow overflow-auto">
         <div class="flex flex-col w-full px-4 pb-4 gap-y-4 divide-y divide-surface-800">
           <div v-for="item in componentsStore.list" class="flex flex-row w-full justify-between items-center">
@@ -34,9 +23,9 @@
           </div>
         </div>
       </div>
-      <div class="flex flex-row items-center justify-end gap-x-2">
-        <div class="text-sm text-surface-400">Found {{ componentsStore.count }} components</div>
-      </div>
+      <Footer>
+        <template #right>Found {{ componentsStore.count }} components</template>
+      </Footer>
     </Async>
 </template>
 
@@ -44,22 +33,17 @@
 import { useToast } from 'primevue/usetoast';
 import Button from 'primevue/button';
 import Badge from 'primevue/badge';
-// import InputText from 'primevue/inputtext';
-// import MultiSelect from 'primevue/multiselect';
-// import FloatLabel from 'primevue/floatlabel';
 import { useComponentsStore } from '../../stores/Components';
 import { ComponentStruct } from '../../structs/Component';
 import { useNavigator } from '../../stores/Navigator';
 import Async from '../state/Async.vue';
 import ComponentListFilters from './ComponentListFilters.vue';
+import Footer from '../navigation/Footer.vue';
 
 const componentsStore = useComponentsStore();
 
 const { add: toast } = useToast();
-
-// function onClearClick() {
-//   componentsStore.query = '';
-// }
+const navigate = useNavigator();
 
 async function copyToClipboard(text: string) {
   try {
@@ -71,6 +55,17 @@ async function copyToClipboard(text: string) {
 }
 
 function onConnectionsClick(item: ComponentStruct) {
+  componentsStore.focusComponent = item.component_name;
+  navigate.go({
+    path: `/component-connections/${item.component_name}`,
+    breadcrumbs: [
+      ...navigate.breadcrumbs,
+      {
+        id: item.component_name,
+        label: item.component_name,
+      }
+    ]
+  })
   useNavigator().push({
     id: item.component_name,
     label: item.component_name,

@@ -80,24 +80,6 @@ export const useComponentsStore = defineStore('ComponentLocation', () => {
     }
   }
 
-  // async function loadSettings() {
-  //   const results = await fetch(`http://127.0.0.1:3000/settings`);
-  //   const data = await results.json();
-  //   if(!data || !data.scopes || data.scopes.length === 0) {
-  //     await fetch(`http://127.0.0.1:3000/settings`, {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json'
-  //       },
-  //       body: JSON.stringify({
-  //         scopes: directoryOptions
-  //       })
-  //     });
-  //   }
-  //   directoryOptions = data.scopes as DirectoryStruct[];
-  //   directories.value = directoryOptions.map(d => d.value);
-  // }
-
   async function load() {
     $loading.value = true;
     $error.value = false;

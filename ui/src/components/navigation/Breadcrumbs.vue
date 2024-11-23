@@ -1,5 +1,5 @@
 <template>
-  <Breadcrumb :model="navigator.breadcrumbs">
+  <Breadcrumb :model="navigator.breadcrumbs" class="!bg-transparent !p-0" v-if="navigator.breadcrumbs.length > 1">
     <template #item="{ item }">
       <div class="cursor-pointer" @click="onClick(item as NavBreadcrumb)">{{ item.label }}</div>
     </template>
@@ -15,11 +15,4 @@ const navigator = useNavigator();
 function onClick(item: NavBreadcrumb) {
   navigator.popTo(item.id);
 }
-
 </script>
-
-<style>
-.p-breadcrumb {
-  background: transparent !important;
-}
-</style>
