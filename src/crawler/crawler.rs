@@ -30,7 +30,7 @@ pub fn get_all_file_paths(dir: &str) -> Vec<PathBuf> {
               if path.is_dir() {
                   // Recursively get files from subdirectories
                   file_paths.extend(get_all_file_paths(path.to_str().unwrap()));
-              } else if path.extension().map_or(false, |ext| ext == "vue") {
+              } else if path.extension().map_or(false, |ext| (ext == "vue" || ext == "ts" || ext == "js" || ext == ".blade.php")) {
                   // Only include files with .vue extension
                   file_paths.push(path);
               }
@@ -52,17 +52,28 @@ pub fn crawl(dir: &str) -> HashMap<String, Node> {
 
     for file_path in file_paths {
         let content = fs::read_to_string(&file_path).expect("Unable to read file");
-        let template_block = extract_template_block(&content);
 
-        if template_block.is_empty() {
+        if !file_path.extension().map_or(false, |ext| {ext == "vue" || ext == "ts" || ext == "js"}) {
             continue;
         }
-        let components = extract_components(&template_block);
 
-        if components.len() > 0 {
+        let mut components_vue = Vec::new();
+
+        if file_path.extension().map_or(false, |ext| ext == "vue") {
+            components_vue.extend(extract_components_from_vue(&content));
+        }
+
+        let mut components_ts = Vec::new();
+
+        if file_path.extension().map_or(false, |ext| ext == "ts" || ext == "js") {
+            components_ts.extend(extract_components_from_ts_js(&content));
+        }
+
+        if components_vue.len() > 0 {
             let file_path_str = file_path.display().to_string();
             let filename = &extract_filename(&file_path_str);
-            for component in components.iter() {
+
+            for component in components_vue.iter() {
                 if !nodes.contains_key(component) {
                     nodes.insert(component.clone(), Node {
                         filename: filename.to_string(),
@@ -82,6 +93,35 @@ pub fn crawl(dir: &str) -> HashMap<String, Node> {
                         filename: extract_filename(&file_path_str),
                         package: extract_package(&file_path_str),
                         component: filename_to_kebab(filename),
+                    });
+                }
+            }
+        }
+
+        if components_ts.len() > 0 {
+            let file_path_str = file_path.display().to_string();
+            let filename = &extract_filename(&file_path_str);
+
+            for component in components_ts.iter() {
+                if !nodes.contains_key(component) {
+                    nodes.insert(component.clone(), Node {
+                        filename: filename.to_string(),
+                        component_name: component.clone(),
+                        locations: vec![Location {
+                            path: file_path_str.clone(),
+                            filename: filename.to_string(),
+                            package: extract_package(&file_path_str),
+                            component: filename.clone(),
+                        }],
+                        children: Vec::new(),
+                    });
+                } else {
+                    let node = nodes.get_mut(component).unwrap();
+                    node.locations.push(Location {
+                        path: file_path_str.clone(),
+                        filename: extract_filename(&file_path_str),
+                        package: extract_package(&file_path_str),
+                        component: filename.clone(),
                     });
                 }
             }
@@ -144,6 +184,30 @@ fn extract_template_block(content: &str) -> String {
     String::new()
 }
 
+fn extract_components_from_ts_js(content: &str) -> Vec<String> {
+    if(content.is_empty()) {
+        return Vec::new()
+    }
+
+    let mut import_statements: Vec<&str> = Vec::new();
+    for line in content.lines() {
+        if line.starts_with("import") {
+            import_statements.push(line);
+        }
+    }
+
+    let mut components: Vec<String> = Vec::new();
+    for statement in import_statements {
+        if let Some(component_name) = statement.split("/").last() {
+            if component_name.ends_with(".vue';") {
+                components.push(to_kebab_case(&component_name.trim().to_string().replace(".vue';", "")));
+            }
+        }
+    }
+
+    components
+}
+
 fn tag_filter(tag: &str) -> bool {
     tag.starts_with('/') 
     || is_valid_html_tag(tag) 
@@ -156,15 +220,20 @@ fn tag_filter(tag: &str) -> bool {
     || tag == "slot"
 }
 
-fn extract_components(content: &str) -> Vec<String> {
+fn extract_components_from_vue(content: &str) -> Vec<String> {
+    let template_block = extract_template_block(&content);
+
+    if template_block.is_empty() {
+        return Vec::new()
+    }
     let mut components = Vec::new();
     let mut start_index = 0;
 
-    while let Some(start) = content[start_index..].find('<') {
+    while let Some(start) = template_block[start_index..].find('<') {
         let start = start_index + start;
-        if let Some(end) = content[start + 1..].find(|c| c == '>' || c == ' ' || c == '/') {
+        if let Some(end) = template_block[start + 1..].find(|c| c == '>' || c == ' ' || c == '/') {
             let end = start + 1 + end;
-            let tag = content[start + 1..end].trim().to_string();
+            let tag = template_block[start + 1..end].trim().to_string();
             // Ignore end tags and HTML void elements
             if !tag_filter(&tag) && !components.contains(&tag) {
                 let component_name = tag.split_whitespace().next().unwrap_or(&tag).to_string();

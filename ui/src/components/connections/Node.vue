@@ -1,7 +1,7 @@
 <template>
   <div class="vue-flow__node-default">
     <Handle type="source" :position="Position.Top" />
-    <div>{{ props.data.label }}</div>
+    <div class="text-sm break-all">{{ props.data.label }}</div>
     <Handle type="source" :position="Position.Bottom" />
   </div>
 </template>
@@ -11,3 +11,9 @@ import { Position, type NodeProps } from '@vue-flow/core'
   
 const props = defineProps<NodeProps>()
 </script>
+
+<style>
+.vue-flow__node {
+  word-wrap: break-word;
+}
+</style>
