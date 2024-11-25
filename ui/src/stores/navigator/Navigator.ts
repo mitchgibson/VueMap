@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { computed, reactive, unref } from "vue";
+import { computed, reactive } from "vue";
 import { RouteRecord, useRouter } from "vue-router";
 
 export type NavRecord = Partial<RouteRecord> & {

@@ -12,13 +12,13 @@ export const useSettingsStore = defineStore('Settings', () => {
   const $error = ref<boolean>(false);
 
   async function loadSettings(): Promise<SettingsStruct> {
-    const results = await fetch(`http://127.0.0.1:3000/settings`);
+    const results = await fetch(`http://127.0.0.1:3000/api/settings`);
     const data = await results.json();
     return data;
   }
 
   async function update(data: SettingsStruct) {
-    await fetch(`http://127.0.0.1:3000/settings`, {
+    await fetch(`http://127.0.0.1:3000/api/settings`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

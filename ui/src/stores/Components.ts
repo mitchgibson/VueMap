@@ -93,7 +93,7 @@ export const useComponentsStore = defineStore('ComponentLocation', () => {
         $error.value = false;
         return;
       }
-      const results = await fetch(`http://127.0.0.1:3000/nodes?dir=${directories.value?.join(',')}&exact=false`);
+      const results = await fetch(`http://127.0.0.1:3000/api/nodes?dir=${directories.value?.join(',')}&exact=false`);
       const data = await results.json();
       rawData.value = data.nodes;
       search();
