@@ -1,3 +1,4 @@
+
 import { LocationStruct } from "./Location";
 
 export type ComponentStruct = {

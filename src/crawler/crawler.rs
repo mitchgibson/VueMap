@@ -185,7 +185,7 @@ fn extract_template_block(content: &str) -> String {
 }
 
 fn extract_components_from_ts_js(content: &str) -> Vec<String> {
-    if(content.is_empty()) {
+    if content.is_empty() {
         return Vec::new()
     }
 

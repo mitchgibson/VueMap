@@ -10,9 +10,7 @@
           </div>
           <div class="flex flex-row items-center justify-end">
             <RouterView name="headerRight" />
-            <NavLink to="/settings" label="Settings">
-              <Button severity="secondary" title="Settings" icon="pi pi-cog" class="p-button-text p-button-sm" />
-            </NavLink>
+            <SettingsButton severity="secondary" variant="text" />
           </div>
         </div>
         <div class="px-5 pb-2 text-xs">
@@ -28,14 +26,13 @@
 import Toast from 'primevue/toast';
 import { useSettingsStore } from './stores/Settings';
 import Async from './components/state/Async.vue';
-import Button from 'primevue/button';
 import RouterTitle from './components/navigation/RouterTitle.vue';
 import Breadcrumb from './components/navigation/Breadcrumbs.vue';
+import SettingsButton from './components/settings/SettingsButton.vue';
 
 const settingsStore = useSettingsStore();
 import { useNavigator } from './stores/navigator/Navigator';
-import NavLink from './components/navigation/NavLink.vue';
 settingsStore.init().then(() => {
   useNavigator();
-})
+});
 </script>

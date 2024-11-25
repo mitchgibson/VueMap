@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia';
-import { TreeNode } from 'primevue/treenode';
 import { computed, ref, watch } from 'vue';
 import { DirectoryStruct } from '../structs/Directory';
 import { Node, Edge } from '@vue-flow/core';
@@ -8,24 +7,27 @@ import { useSettingsStore } from './Settings';
 
 export const useComponentsStore = defineStore('ComponentLocation', () => {
   const settingsStore = useSettingsStore();
-  const directoryOptions = ref<DirectoryStruct[]>(settingsStore.$settings.scopes);
+  const directoryOptions = ref<readonly DirectoryStruct[]>(settingsStore.$settings.scopes);
   
   const directories = ref(directoryOptions.value.map(d => d.value));
   const rawData = ref<{[key: string]: ComponentStruct}>({});
   const query = ref<string>('');
-  const components = ref<TreeNode[]>([]);
-  const count = computed(() => components.value.length);
   const focusComponent = ref<string>('');
   const graph = ref<{nodes: Node[], edges: Edge[]}>({ nodes: [], edges: [] });
   const list = ref<ComponentStruct[]>([]);
+  const count = computed(() => list.value.length);
   const $loading = ref<boolean>(false);
   const $error = ref<boolean>(false);
-
-  load();
+  const $empty = computed(() => list.value.length === 0);
 
   watch(focusComponent, () => {
     buildGraph();
   });
+
+  watch(() => settingsStore.$settings.scopes, () => {
+    directoryOptions.value = settingsStore.$settings.scopes;
+    directories.value = directoryOptions.value.map(d => d.value);
+  }, { flush: 'pre' });
 
   function buildGraph() {
     graph.value = { nodes: [], edges: [] };
@@ -85,6 +87,10 @@ export const useComponentsStore = defineStore('ComponentLocation', () => {
     $error.value = false;
     try {
       if(!directories.value || directories.value.length === 0) {
+        rawData.value = {};
+        list.value = [];
+        $loading.value = false;
+        $error.value = false;
         return;
       }
       const results = await fetch(`http://127.0.0.1:3000/nodes?dir=${directories.value?.join(',')}&exact=false`);
@@ -99,6 +105,8 @@ export const useComponentsStore = defineStore('ComponentLocation', () => {
 
   async function search() {
     if(!directories.value) {
+      $loading.value = false;
+      $error.value = false;
       return;
     }
     $loading.value = true;
@@ -112,7 +120,6 @@ export const useComponentsStore = defineStore('ComponentLocation', () => {
           return acc;
         }, {});
       }
-      components.value = toTreeNodes(data);
       list.value = toList(data);
     } catch(err) {
       $error.value = true;
@@ -128,26 +135,6 @@ export const useComponentsStore = defineStore('ComponentLocation', () => {
     load();
   });
 
-  function toTreeNodes(data: {[key: string]: ComponentStruct}): TreeNode[] {
-    return Object.keys(data).map(key => {
-      return {
-        key: key,
-        label: data[key].component_name,
-        data: {
-          filename: data[key].filename,
-          parents: data[key].locations.map(location => {
-            return {
-              key: location.path,
-              label: location.filename,
-              data: location
-            }
-          }),
-          children: data[key].children
-        }
-      }
-    });
-  }
-
   function toList(data: {[key: string]: ComponentStruct}) {
     return Object.keys(data).map(key => data[key]);
   }
@@ -157,18 +144,18 @@ export const useComponentsStore = defineStore('ComponentLocation', () => {
   }
 
   return {
-    // loadSettings,
+    load,
     search,
     query,
     $loading,
     $error,
+    $empty,
     directories,
     directoryOptions,
     count,
     focusComponent,
-    components,
     graph,
     list,
-    getComponent
+    getComponent,
   }
 });
