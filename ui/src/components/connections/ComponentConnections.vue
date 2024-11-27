@@ -41,7 +41,7 @@ function onNodeClick(data: { node: { id: string }}) {
       }
     });
   } else {
-    toast({ severity: 'error', detail: 'Component not found. Likely this component is not referenced in a template', life: 3000 });
+    toast({ severity: 'error', detail: 'Component not found. Likely this component is not referenced in a template or the file is not a component file', life: 3000 });
   }
 }
 
