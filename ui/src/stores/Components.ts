@@ -7,7 +7,7 @@ import { useSettingsStore } from './Settings';
 
 export const useComponentsStore = defineStore('ComponentLocation', () => {
   const settingsStore = useSettingsStore();
-  const directoryOptions = ref<readonly DirectoryStruct[]>(settingsStore.$settings.scopes);
+  const directoryOptions = ref<DirectoryStruct[]>([...settingsStore.$settings.scopes]);
   
   const directories = ref(directoryOptions.value.map(d => d.value));
   const rawData = ref<{[key: string]: ComponentStruct}>({});
@@ -26,7 +26,7 @@ export const useComponentsStore = defineStore('ComponentLocation', () => {
   });
 
   watch(() => settingsStore.$settings.scopes, () => {
-    directoryOptions.value = settingsStore.$settings.scopes;
+    directoryOptions.value = [...settingsStore.$settings.scopes];
     directories.value = directoryOptions.value.map(d => d.value);
   }, { flush: 'pre' });
 
