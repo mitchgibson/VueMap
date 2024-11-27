@@ -2,7 +2,7 @@ use std::fs;
 use std::path::PathBuf;
 use std::collections::HashMap;
 use serde::Serialize;
-use crate::casing::casing::to_kebab_case;
+use crate::casing::casing::{to_kebab_case, to_pascal_case};
 
 #[derive(Debug, PartialEq, Serialize, Clone)]
 pub struct Location {
@@ -76,7 +76,7 @@ pub fn crawl(dir: &str) -> HashMap<String, Node> {
             for component in components_vue.iter() {
                 if !nodes.contains_key(component) {
                     nodes.insert(component.clone(), Node {
-                        filename: filename.to_string(),
+                        filename: to_pascal_case(component) + ".vue",
                         component_name: component.clone(),
                         locations: vec![Location {
                             path: file_path_str.clone(),
@@ -105,7 +105,7 @@ pub fn crawl(dir: &str) -> HashMap<String, Node> {
             for component in components_ts.iter() {
                 if !nodes.contains_key(component) {
                     nodes.insert(component.clone(), Node {
-                        filename: filename.to_string(),
+                        filename: to_pascal_case(component) + ".vue",
                         component_name: component.clone(),
                         locations: vec![Location {
                             path: file_path_str.clone(),

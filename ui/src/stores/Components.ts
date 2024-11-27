@@ -19,6 +19,7 @@ export const useComponentsStore = defineStore('ComponentLocation', () => {
   const $loading = ref<boolean>(false);
   const $error = ref<boolean>(false);
   const $empty = computed(() => list.value.length === 0);
+  const $searching = computed(() => !!query.value.length);
 
   watch(focusComponent, () => {
     buildGraph();
@@ -112,7 +113,13 @@ export const useComponentsStore = defineStore('ComponentLocation', () => {
     $loading.value = true;
     $error.value = false;
     try {
-      const filteredData = Object.keys(rawData.value).filter(key => key.includes(query.value));
+      const filteredData = Object.keys(rawData.value).filter(key => {
+        const lowercaseKey = key.toLowerCase();
+        const lowercaseQuery = query.value.toLowerCase();
+        const keyStripped = lowercaseKey.replace(/-/g, '');
+        const queryStripped = lowercaseQuery.replace(/-/g, '');
+        return keyStripped.includes(queryStripped);
+      });
       let data = rawData.value;
       if(query.value) {
         data = filteredData.reduce((acc: {[key: string]: ComponentStruct}, key) => {
@@ -150,6 +157,7 @@ export const useComponentsStore = defineStore('ComponentLocation', () => {
     $loading,
     $error,
     $empty,
+    $searching,
     directories,
     directoryOptions,
     count,
